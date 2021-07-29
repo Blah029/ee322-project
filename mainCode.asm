@@ -5,5 +5,5 @@
 ; Group G1
 ;     E/17/146: Jayawickrama J.P.D.D.M
 ;     E/17/234: Pandukabhaya V.K.M
-;     E/17/371: Warnakulasuriya. R
+;     E/17/371: Warnakulasuriya R
 
