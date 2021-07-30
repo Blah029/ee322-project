@@ -1,0 +1,88 @@
+// EE322 Project
+// Pseudocode
+
+// Define Constants: weight thresholds
+- W_1
+- W_2
+- W_5
+- W_10
+
+// Global Variables
+- Coin_type = 0    // The type of coin (1, 2, 5, 10)
+- Motor1_Angle = 0
+- Motor2_Angle = 0
+
+- Coin_Count1  = 0
+- Coin_Count2  = 0
+- Coin_Count5  = 0
+- Coin_Count10 = 0
+
+// Activate the servo motors
+// and turn them to their default positions
+Turn Motor1 to 0
+Turn Motor2 to 0
+Turn Motor3 to 0
+
+While (Alive) {
+	// Read the raw data from the sensor
+    W = Read_Weight()
+
+	// Identify coin type (if any)
+	// and assign the coin type to a variable: Coin_type
+    If (W == W_1) {
+    	Coin_type = 1
+    	Motor1_Angle = 30
+    	Motor2_Angle = 0
+    }
+    Else If (W == W_2) {
+    	Coin_type = 2
+    	Motor1_Angle = -30
+    	Motor2_Angle = 0
+    }
+    Else If (W == W_5) {
+    	Coin_type = 5
+    	Motor1_Angle = +30
+    	Motor2_Angle = 90
+    }
+    Else If (W == W_10) {
+    	Coin_type = 10
+    	Motor1_Angle = -30
+    	Motor2_Angle = 90
+    }
+    Else {
+    	Coin_type = 0
+    }
+    
+    // If there's a valid coin (according to the weight)
+    If (Coin_type > 0) {
+    	// Accept the coin by opening the "gate"
+    	Turn Motor3_Angle = 90
+    	Delay
+    	Turn Motor3_Angle = 0
+    	Delay
+    	
+    	// Rotate vertical-axis motor
+    	Turn Motor2_Angle = Motor2_Angle
+    	Delay
+    	
+    	// Tilt the platform
+    	Turn Motor1_Angle = Motor1_Angle
+    	Delay
+    	
+    	// Compute
+    	- Increment Count 1, 2, 5, or 10
+    	- Use a contiguous register logic
+    		- e.g. 0x12: 1, 0x13: 2, 0x14: 5, 0x15: 10
+    		-      and use a jump depending on the coin type
+    	
+    	// Display
+    	    - Display the coin counts?
+    	
+    	// Revert back the platform
+    	// back to its original position
+    	Turn Motor1_Angle = 0
+    	Delay
+    	Turn Motor2_Angle = 0
+    	Delay
+    }
+}
