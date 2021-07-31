@@ -1,0 +1,34 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Sat Jul 31 09:05:31 2021
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x00000e
+                   .cinit    romdata   0x000007    program   0x000004
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000008      
+            9 out of 1094 program addresses used, program memory utilization is 0%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+             _.org_0_0006   0x000006    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                     main   0x000000    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                     main   0x000000    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             _.org_0_0006   0x000006    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+
+
