@@ -1,10 +1,8 @@
 # EE322 Project
 
----
-
 3rd year EE322 project
 
-- Group members (formed on 07/06/2021)
+- Group G1 (formed on 07/06/2021)
   - E/17/146: Jayawickrama JPD
   - E/17/234: Pandukabhaya VKM
   - E/17/371: Warnakulasuriya R
