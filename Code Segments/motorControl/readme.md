@@ -19,8 +19,3 @@ Subroutines for cotroling gate (motor3), platform rotation (motor2), and platfor
     Tip platform to 0 degree position.
    - motor1Pos3 </br>
     Tip platform to 30 degree position.
-
-angle	|count1	|count2	|count3		|count1	|count2	|count3 </br>
--90 ----| 72----|2------|1--------------| 72----|2------|1----- </br>
-  0 ----|238----|2------|1--------------|161----|1------|1----- </br>
-+90 ----|149----|3------|1--------------|-------|-------|------ </br>
