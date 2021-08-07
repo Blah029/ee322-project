@@ -217,7 +217,7 @@ testAll
 	movlw		d'3'					; set layer 3 delay counter
 	movwf		count3					; 
 	call delay							; wait time
-	call servo1Pos1
+	call servo1Pos3
 	movlw		d'1'					; set layer 1 delay counter
 	movwf		count1					; 
 	movlw		d'1'					; set layer 2 delay counter
@@ -225,7 +225,7 @@ testAll
 	movlw		d'3'					; set layer 3 delay counter
 	movwf		count3					; 
 	call delay							; wait time
-	call servo1Pos3
+	call servo1Pos1
 	movlw		d'1'					; set layer 1 delay counter
 	movwf		count1					; 
 	movlw		d'1'					; set layer 2 delay counter
