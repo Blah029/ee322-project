@@ -7,10 +7,9 @@ resVect			code	    0x00	    ; upcode
 intVect			code	    0x04	    ; interrupt service routine
     retfie
 	
-motor			equ			0x0c		; used in motor control
-count1			equ			0x0d		; used in a decfsz
-count2			equ			0x0e		; used in a decfsz
-count3			equ			0x0f		; used in a decfsz
+count1			equ			0x0c		; used in a decfsz
+count2			equ			0x0d		; used in a decfsz
+count3			equ			0x0e		; used in a decfsz
     
 init									; initialisation
 	bsf			STATUS,		RP0			; access bank 1
