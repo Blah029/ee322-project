@@ -1,4 +1,3 @@
-	|on time			|off time
 # motorControl
 Subroutines for cotroling gate (motor3), platform rotation (motor2), and platform tipping (motor1). Copy and paste to mainCode.
 
