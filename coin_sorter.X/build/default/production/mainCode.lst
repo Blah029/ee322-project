@@ -1,4 +1,4 @@
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  1
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -57,7 +57,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00041         
                       00042         org         0x04                ; Interrupt vector
 0004   2???           00043         goto        ISR                 ; Unimplemented
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  2
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -84,263 +84,286 @@ Message[302]: Register in operand not in bank 0.  Ensure that bank bits are corr
 0009   1701           00061         bsf         OPTION_REG, INTEDG  ; Interrupt on rising edge of
                       00062                                         ; RB0/INT pin
                       00063 
-                      00064 ; PORTA, PORTB pin modes
+                      00064 ; Set PORTA, PORTB pin modes
 000A   30FF           00065         movlw       b'11111111'         ; PORTB I/O pattern
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
 000B   0086           00066         movwf       TRISB               ; Set PORTB pin modes
                       00067         
-000C   3000           00068         movlw       b'00000'            ; PORTA I/O pattern
+000C   3000           00068         movlw       b'00000000'         ; PORTA I/O pattern
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
 000D   0085           00069         movwf       TRISA               ; Set PORTA pin modes
                       00070         
-000E   1283           00071         bcf         STATUS, 5           ; Bank 0 select
+000E   1283           00071         bcf         STATUS, RP0         ; Bank 0 select
                       00072 
                       00073 ; Initialize PORTA and PORTB
-000F   3000           00074         movlw       b'00000000'
+000F   3000           00074         movlw       b'00000000'         ; All zeros
 0010   0086           00075         movwf       PORTB
-0011   3000           00076         movlw       b'00000'
+0011   3000           00076         movlw       b'00000000'         ; All zeros
 0012   0085           00077         movwf       PORTA
                       00078         
-                      00079 ;-------------------------------------------------------------------------------
-                      00080 
-                      00081 ;-------------------------------------------------------------------------------
-                      00082 ; Routine "MAIN"
-0013                  00083 MAIN:
-                      00084         ; Example usage of motor control
-                      00085         
-                      00086         ;Tip the platform +30
-0013   3004           00087         movlw       b'00000100'         ; turn on RA2
-0014   0085           00088         movwf       PORTA               ; 
-0015   2???           00089         call        MOTOR_PLUS30_ON     ;
-                      00090         
-0016   3000           00091         movlw       b'00000000'         ; turn off RA2
-0017   0085           00092         movwf       PORTA               ; 
-0018   2???           00093         call        MOTOR_PLUS30_OFF    ;
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  3
+                      00079 ; Initialize positions of the three motors to zero        
+0013   3007           00080         movlw       b'00000111'         ; turn on RA0, RA1, RA2
+0014   0085           00081         movwf       PORTA               ; 
+0015   2???           00082         call        MOTOR_0_ON          ;
+                      00083         
+0016   3000           00084         movlw       b'00000000'         ; turn off RA0, RA1, RA2
+0017   0085           00085         movwf       PORTA               ; 
+0018   2???           00086         call        MOTOR_0_OFF         ;
+                      00087         
+0019   2???           00088         call        DELAY_1S
+                      00089         
+                      00090 ;-------------------------------------------------------------------------------
+                      00091 
+                      00092 ;-------------------------------------------------------------------------------
+                      00093 ; Routine "MAIN"
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00094         
-0019   2???           00095         call        DELAY_1S
+001A                  00094 MAIN:
+                      00095         ; The MAIN loop
                       00096         
-                      00097         ;Make the platform horizontal
-001A   3004           00098         movlw       b'00000100'         ; turn on RA2
-001B   0085           00099         movwf       PORTA               ; 
-001C   2???           00100         call        MOTOR_0_ON          ;
-                      00101         
-001D   3000           00102         movlw       b'00000000'         ; turn off RA2
-001E   0085           00103         movwf       PORTA               ; 
-001F   2???           00104         call        MOTOR_0_OFF         ;
-                      00105         
-0020   2???           00106         call        DELAY_1S
-                      00107         
-                      00108         ;Tip the platform -30
-0021   3004           00109         movlw       b'00000100'         ; turn on RA2
-0022   0085           00110         movwf       PORTA               ; 
-0023   2???           00111         call        MOTOR_MINUS30_ON    ;
-                      00112         
-0024   3000           00113         movlw       b'00000000'         ; turn off RA2
-0025   0085           00114         movwf       PORTA               ; 
-0026   2???           00115         call        MOTOR_MINUS30_OFF   ;
-                      00116         
-0027   2???           00117         call        DELAY_1S
-                      00118         
-                      00119         ;Make the platform horizontal
-0028   3004           00120         movlw       b'00000100'         ; turn on RA2
-0029   0085           00121         movwf       PORTA               ; 
-002A   2???           00122         call        MOTOR_0_ON          ;
-                      00123         
-002B   3000           00124         movlw       b'00000000'         ; turn off RA2
-002C   0085           00125         movwf       PORTA               ; 
-002D   2???           00126         call        MOTOR_0_OFF         ;
-                      00127         
-002E   2???           00128         call        DELAY_1S
+001A   2???           00097         goto        MAIN                ; Go to the MAIN routine again (loop)
+                      00098 
+                      00099 ;-------------------------------------------------------------------------------
+                      00100 ; Subroutine "READ_SENSOR_VALUE"
+001B                  00101 READ_SENSOR_VALUE:
+                      00102         ;        unsigned long Count;
+                      00103         ;        unsigned char i;
+                      00104     
+                      00105 ;        pinMode(DT, OUTPUT);
+001B   1683           00106         bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+001C   3000           00107         movlw       b'00000000'         ; PORTA I/O pattern
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001D   0085           00108         movwf       TRISA               ; Set PORTA pin modes
+                      00109         
+                      00110 ;        digitalWrite(DT,HIGH);
+                      00111 ;        digitalWrite(SCK,LOW);
+001E   1283           00112         bcf         STATUS, RP0         ; Bank 0 select
+001F   3010           00113         movlw       b'00010000'         ; turn on DOUT, turn off SCK
+0020   0085           00114         movwf       PORTA               ; 
+                      00115         
+                      00116         ; count = 0
+                      00117 
+                      00118 ;        pinMode(DT, INPUT);
+0021   1683           00119         bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+0022   3010           00120         movlw       b'00010000'         ; PORTA I/O pattern
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0023   0085           00121         movwf       TRISA               ; Set PORTA pin modes
+                      00122         
+0024   1283           00123         bcf         STATUS, RP0         ; Bank 0 select
+                      00124 
+                      00125 ;        while(digitalRead(DT));
+0025                  00126 DOUT_1:
+0025   1A05           00127         btfsc       PORTA, 4
+0026   2???           00128         goto        DOUT_1
                       00129         
-002F   2???           00130         goto        MAIN                ; Go to the MAIN routine again (loop)
-                      00131 
-                      00132 ;-------------------------------------------------------------------------------
-                      00133 ; Subroutine "READ_SENSOR_VALUE"
-0030                  00134 READ_SENSOR_VALUE:
-                      00135 ;        unsigned long Count;
-                      00136 ;        unsigned char i;
-                      00137 ;        pinMode(DT, OUTPUT);
-                      00138 ;        digitalWrite(DT,HIGH);
-                      00139 ;        digitalWrite(SCK,LOW);
-                      00140 ;        Count=0
-                      00141 ;        pinMode(DT, INPUT);
-                      00142 ;        while(digitalRead(DT));
-                      00143 ;        for (i=0;i<24;i++)
-                      00144 ;        {
-                      00145 ;          digitalWrite(SCK,HIGH);
-                      00146 ;          Count=Count<<1;
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  4
+                      00130         ;        for (i = 0; i < 24; i++)
+                      00131         ;        {
+                      00132         ;          digitalWrite(SCK, HIGH);
+                      00133         ;          Count = Count << 1;
+                      00134         ;          digitalWrite(SCK, LOW);
+                      00135         ;          if (digitalRead(DT)) 
+                      00136         ;              Count++;
+                      00137         ;        }
+                      00138 
+                      00139 ;        digitalWrite(SCK,HIGH);
+0027   3008           00140         movlw       b'00001000'         ; turn on SCK
+0028   0085           00141         movwf       PORTA               ; 
+                      00142         
+                      00143         ; Count = Count^0x800000;
+                      00144         
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  4
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00147 ;          digitalWrite(SCK,LOW);
-                      00148 ;          if(digitalRead(DT)) 
-                      00149 ;          Count++;
-                      00150 ;        }
-                      00151 ;        digitalWrite(SCK,HIGH);
-                      00152 ;        Count=Count^0x800000;
-                      00153 ;        digitalWrite(SCK,LOW);
-                      00154 ;        return(Count);
-                      00155     
-0030   0008           00156         return
-                      00157         
-                      00158 ;-------------------------------------------------------------------------------
-                      00159 ; ISR ""
-0031                  00160 ISR:
-                      00161         ; Interrupt occurred
-0031   0009           00162         retfie                          ; Return from interrupt
-                      00163 ;-------------------------------------------------------------------------------
-                      00164         
-                      00165 ;-------------------------------------------------------------------------------
-                      00166 ; Delay subroutine (general)
-                      00167 ; T = 18 + (count1-1)*3 + (count2-1)*770 + (count3-1)*197140 ns
-0032                  00168 DELAY
-Message[305]: Using default destination of 1 (file).
-0032   0B8C           00169         decfsz      count1
-0033   2???           00170         goto        DELAY
-                      00171         
-Message[305]: Using default destination of 1 (file).
-0034   0B8D           00172         decfsz      count2
-0035   2???           00173         goto        DELAY
-                      00174         
-Message[305]: Using default destination of 1 (file).
-0036   0B8E           00175         decfsz      count3
-0037   2???           00176         goto        DELAY
-                      00177         
-0038   0008           00178         return
-                      00179 
-                      00180 ;-------------------------------------------------------------------------------
-                      00181 
-                      00182 ;-------------------------------------------------------------------------------
-                      00183 ; Motor Controller subroutines
-                      00184 
-0039                  00185 MOTOR_PLUS90_ON:
-0039   3095           00186         movlw       d'149'              ; set layer 1 delay counter
-003A   008C           00187         movwf       count1              ; 
-003B   3003           00188         movlw       d'3'                ; set layer 2 delay counter
-003C   008D           00189         movwf       count2              ; 
-003D   3001           00190         movlw       d'1'                ; set layer 3 delay counter
-003E   008E           00191         movwf       count3              ; 
-003F   2???           00192         call        DELAY               ; 90deg on time
-                      00193         
-0040   0008           00194         return
+                      00145 ;        digitalWrite(SCK,LOW);
+0029   3000           00146         movlw       b'00000000'         ; turn off SCK
+002A   0085           00147         movwf       PORTA               ; 
+                      00148         
+                      00149         ; return(Count);
+                      00150         
+                      00151 ;-------------------------------------------------------------------------------
+                      00152 ;        unsigned long Count;
+                      00153 ;        unsigned char i;
+                      00154 ;        pinMode(DT, OUTPUT);
+                      00155 ;        digitalWrite(DT,HIGH);
+                      00156 ;        digitalWrite(SCK,LOW);
+                      00157 ;        Count=0
+                      00158 ;        pinMode(DT, INPUT);
+                      00159 ;        while(digitalRead(DT));
+                      00160 ;        for (i=0; i<24; i++)
+                      00161 ;        {
+                      00162 ;          digitalWrite(SCK, HIGH);
+                      00163 ;          Count = Count << 1;
+                      00164 ;          digitalWrite(SCK, LOW);
+                      00165 ;          if (digitalRead(DT)) 
+                      00166 ;               Count++;
+                      00167 ;        }
+                      00168 ;        digitalWrite(SCK,HIGH);
+                      00169 ;        Count=Count^0x800000;
+                      00170 ;        digitalWrite(SCK,LOW);
+                      00171 ;        return(Count);
+                      00172 ;-------------------------------------------------------------------------------
+                      00173         
+002B   0008           00174         return
+                      00175         
+                      00176 ;-------------------------------------------------------------------------------
+                      00177 ; ISR ""
+002C                  00178 ISR:
+                      00179         ; Interrupt occurred event
+002C   0009           00180         retfie                          ; Return from interrupt
+                      00181 ;-------------------------------------------------------------------------------
+                      00182         
+                      00183 ;-------------------------------------------------------------------------------
+                      00184 ; Delay subroutine (general)
+                      00185 ; T = 18 + (count1-1)*3 + (count2-1)*770 + (count3-1)*197140 ns
+002D                  00186 DELAY
+002D   0B8C           00187         decfsz      count1, f
+002E   2???           00188         goto        DELAY
+                      00189         
+002F   0B8D           00190         decfsz      count2, f
+0030   2???           00191         goto        DELAY
+                      00192         
+0031   0B8E           00193         decfsz      count3, f
+0032   2???           00194         goto        DELAY
                       00195         
-0041                  00196 MOTOR_PLUS90_OFF:
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  5
+0033   0008           00196         return
+                      00197 
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  5
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0041   3001           00197         movlw       d'1'                ; set layer 1 delay counter
-0042   008C           00198         movwf       count1              ; 
-0043   3001           00199         movlw       d'1'                ; set layer 2 delay counter
-0044   008D           00200         movwf       count2              ; 
-0045   3003           00201         movlw       d'3'                ; set layer 3 delay counter
-0046   008E           00202         movwf       count3              ; 
-0047   2???           00203         call        DELAY               ; 90deg off time
-                      00204         
-0048   0008           00205         return
-                      00206 
-0049                  00207 MOTOR_0_ON:
-0049   30EE           00208         movlw       d'238'              ; set layer 1 delay counter
-004A   008C           00209         movwf       count1              ; 
-004B   3002           00210         movlw       d'2'                ; set layer 2 delay counter
-004C   008D           00211         movwf       count2              ; 
-004D   3001           00212         movlw       d'1'                ; set layer 3 delay counter
-004E   008E           00213         movwf       count3              ; 
-004F   2???           00214         call        DELAY               ; 0deg on time
-                      00215         
-0050   0008           00216         return
-                      00217         
-0051                  00218 MOTOR_0_OFF:
-0051   30A1           00219         movlw       d'161'              ; set layer 1 delay counter
-0052   008C           00220         movwf       count1              ; 
-0053   3001           00221         movlw       d'1'                ; set layer 2 delay counter
-0054   008D           00222         movwf       count2              ; 
-0055   3001           00223         movlw       d'1'                ; set layer 3 delay counter
-0056   008E           00224         movwf       count3              ; 
-0057   2???           00225         call        DELAY               ; 0deg off time
-                      00226         
-0058   0008           00227         return
-                      00228         
-0059                  00229 MOTOR_MINUS30_ON:
-0059   30B7           00230         movlw       d'183'              ; set layer 1 delay counter
-005A   008C           00231         movwf       count1              ; 
-005B   3002           00232         movlw       d'2'                ; set layer 2 delay counter
-005C   008D           00233         movwf       count2              ; 
-005D   3001           00234         movlw       d'1'                ; set layer 3 delay counter
-005E   008E           00235         movwf       count3              ; 
-005F   2???           00236         call        DELAY               ; -30deg on time
-                      00237         
-0060   0008           00238         return
-                      00239         
-0061                  00240 MOTOR_MINUS30_OFF:
-0061   30D9           00241         movlw       d'217'              ; set layer 1 delay counter
-0062   008C           00242         movwf       count1              ; 
-0063   3001           00243         movlw       d'1'                ; set layer 2 delay counter
-0064   008D           00244         movwf       count2              ; 
-0065   3001           00245         movlw       d'1'                ; set layer 3 delay counter
-0066   008E           00246         movwf       count3              ; 
-0067   2???           00247         call        DELAY               ; -30deg off time
-                      00248         
-0068   0008           00249         return
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  6
+                      00198 ;-------------------------------------------------------------------------------
+                      00199 
+                      00200 ;-------------------------------------------------------------------------------
+                      00201 ; Motor Controller subroutines
+                      00202 
+0034                  00203 MOTOR_PLUS90_ON:
+0034   3095           00204         movlw       d'149'              ; set layer 1 delay counter
+0035   008C           00205         movwf       count1              ; 
+0036   3003           00206         movlw       d'3'                ; set layer 2 delay counter
+0037   008D           00207         movwf       count2              ; 
+0038   3001           00208         movlw       d'1'                ; set layer 3 delay counter
+0039   008E           00209         movwf       count3              ; 
+003A   2???           00210         call        DELAY               ; 90deg on time
+                      00211         
+003B   0008           00212         return
+                      00213         
+003C                  00214 MOTOR_PLUS90_OFF:
+003C   3001           00215         movlw       d'1'                ; set layer 1 delay counter
+003D   008C           00216         movwf       count1              ; 
+003E   3001           00217         movlw       d'1'                ; set layer 2 delay counter
+003F   008D           00218         movwf       count2              ; 
+0040   3003           00219         movlw       d'3'                ; set layer 3 delay counter
+0041   008E           00220         movwf       count3              ; 
+0042   2???           00221         call        DELAY               ; 90deg off time
+                      00222         
+0043   0008           00223         return
+                      00224 
+0044                  00225 MOTOR_0_ON:
+0044   30EE           00226         movlw       d'238'              ; set layer 1 delay counter
+0045   008C           00227         movwf       count1              ; 
+0046   3002           00228         movlw       d'2'                ; set layer 2 delay counter
+0047   008D           00229         movwf       count2              ; 
+0048   3001           00230         movlw       d'1'                ; set layer 3 delay counter
+0049   008E           00231         movwf       count3              ; 
+004A   2???           00232         call        DELAY               ; 0deg on time
+                      00233         
+004B   0008           00234         return
+                      00235         
+004C                  00236 MOTOR_0_OFF:
+004C   30A1           00237         movlw       d'161'              ; set layer 1 delay counter
+004D   008C           00238         movwf       count1              ; 
+004E   3001           00239         movlw       d'1'                ; set layer 2 delay counter
+004F   008D           00240         movwf       count2              ; 
+0050   3001           00241         movlw       d'1'                ; set layer 3 delay counter
+0051   008E           00242         movwf       count3              ; 
+0052   2???           00243         call        DELAY               ; 0deg off time
+                      00244         
+0053   0008           00245         return
+                      00246         
+0054                  00247 MOTOR_MINUS30_ON:
+0054   30B7           00248         movlw       d'183'              ; set layer 1 delay counter
+0055   008C           00249         movwf       count1              ; 
+0056   3002           00250         movlw       d'2'                ; set layer 2 delay counter
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  6
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00250 
-0069                  00251 MOTOR_PLUS30_ON:
-0069   3025           00252         movlw       d'37'               ; set layer 1 delay counter
-006A   008C           00253         movwf       count1              ; 
-006B   3003           00254         movlw       d'3'                ; set layer 2 delay counter
-006C   008D           00255         movwf       count2              ; 
-006D   3001           00256         movlw       d'1'                ; set layer 3 delay counter
-006E   008E           00257         movwf       count3              ; 
-006F   2???           00258         call        DELAY               ; +30deg on time
-                      00259         
-0070   0008           00260         return
-                      00261         
-0071                  00262 MOTOR_PLUS30_OFF:
-0071   306A           00263         movlw       d'106'              ; set layer 1 delay counter
-0072   008C           00264         movwf       count1              ; 
-0073   3001           00265         movlw       d'1'                ; set layer 2 delay counter
-0074   008D           00266         movwf       count2              ; 
-0075   3001           00267         movlw       d'1'                ; set layer 3 delay counter
-0076   008E           00268         movwf       count3              ; 
-0077   2???           00269         call        DELAY               ; +30deg off time
-                      00270         
-0078   0008           00271         return
-                      00272         
-0079                  00273 DELAY_1S:
-0079   308E           00274         movlw       d'142'              ; set layer 1 delay counter
-007A   008C           00275         movwf       count1              ; 
-007B   3013           00276         movlw       d'19'               ; set layer 2 delay counter
-007C   008D           00277         movwf       count2              ; 
-007D   3006           00278         movlw       d'6'                ; set layer 3 delay counter
-007E   008E           00279         movwf       count3              ; 
-007F   2???           00280         call        DELAY               ; +30deg off time
-                      00281         
-0080   0008           00282         return
-                      00283         
-                      00284 ;-------------------------------------------------------------------------------
-0081                  00285 INF_LOOP:
-0081   2???           00286         goto    $
-                      00287 ;-------------------------------------------------------------------------------
+0057   008D           00251         movwf       count2              ; 
+0058   3001           00252         movlw       d'1'                ; set layer 3 delay counter
+0059   008E           00253         movwf       count3              ; 
+005A   2???           00254         call        DELAY               ; -30deg on time
+                      00255         
+005B   0008           00256         return
+                      00257         
+005C                  00258 MOTOR_MINUS30_OFF:
+005C   30D9           00259         movlw       d'217'              ; set layer 1 delay counter
+005D   008C           00260         movwf       count1              ; 
+005E   3001           00261         movlw       d'1'                ; set layer 2 delay counter
+005F   008D           00262         movwf       count2              ; 
+0060   3001           00263         movlw       d'1'                ; set layer 3 delay counter
+0061   008E           00264         movwf       count3              ; 
+0062   2???           00265         call        DELAY               ; -30deg off time
+                      00266         
+0063   0008           00267         return
+                      00268 
+0064                  00269 MOTOR_PLUS30_ON:
+0064   3025           00270         movlw       d'37'               ; set layer 1 delay counter
+0065   008C           00271         movwf       count1              ; 
+0066   3003           00272         movlw       d'3'                ; set layer 2 delay counter
+0067   008D           00273         movwf       count2              ; 
+0068   3001           00274         movlw       d'1'                ; set layer 3 delay counter
+0069   008E           00275         movwf       count3              ; 
+006A   2???           00276         call        DELAY               ; +30deg on time
+                      00277         
+006B   0008           00278         return
+                      00279         
+006C                  00280 MOTOR_PLUS30_OFF:
+006C   306A           00281         movlw       d'106'              ; set layer 1 delay counter
+006D   008C           00282         movwf       count1              ; 
+006E   3001           00283         movlw       d'1'                ; set layer 2 delay counter
+006F   008D           00284         movwf       count2              ; 
+0070   3001           00285         movlw       d'1'                ; set layer 3 delay counter
+0071   008E           00286         movwf       count3              ; 
+0072   2???           00287         call        DELAY               ; +30deg off time
                       00288         
-                      00289 ;-------------------------------------------------------------------------------
-                      00290         end
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  7
+0073   0008           00289         return
+                      00290         
+0074                  00291 DELAY_1S:
+0074   308E           00292         movlw       d'142'              ; set layer 1 delay counter
+0075   008C           00293         movwf       count1              ; 
+0076   3013           00294         movlw       d'19'               ; set layer 2 delay counter
+0077   008D           00295         movwf       count2              ; 
+0078   3006           00296         movlw       d'6'                ; set layer 3 delay counter
+0079   008E           00297         movwf       count3              ; 
+007A   2???           00298         call        DELAY               ; +30deg off time
+                      00299         
+007B   0008           00300         return
+                      00301         
+                      00302 ;-------------------------------------------------------------------------------
+007C                  00303 INF_LOOP:
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+007C   2???           00304         goto    $
+                      00305 ;-------------------------------------------------------------------------------
+                      00306         
+                      00307 ;-------------------------------------------------------------------------------
+                      00308         end
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  8
 
 
 SYMBOL TABLE
@@ -348,8 +371,9 @@ SYMBOL TABLE
 
 C                                 00000000
 DC                                00000001
-DELAY                             00000032
-DELAY_1S                          00000079
+DELAY                             0000002D
+DELAY_1S                          00000074
+DOUT_1                            00000025
 EEADR                             00000009
 EECON1                            00000088
 EECON2                            00000089
@@ -360,23 +384,23 @@ F                                 00000001
 FSR                               00000004
 GIE                               00000007
 INDF                              00000000
-INF_LOOP                          00000081
+INF_LOOP                          0000007C
 INIT                              00000005
 INTCON                            0000000B
 INTE                              00000004
 INTEDG                            00000006
 INTF                              00000001
 IRP                               00000007
-ISR                               00000031
-MAIN                              00000013
-MOTOR_0_OFF                       00000051
-MOTOR_0_ON                        00000049
-MOTOR_MINUS30_OFF                 00000061
-MOTOR_MINUS30_ON                  00000059
-MOTOR_PLUS30_OFF                  00000071
-MOTOR_PLUS30_ON                   00000069
-MOTOR_PLUS90_OFF                  00000041
-MOTOR_PLUS90_ON                   00000039
+ISR                               0000002C
+MAIN                              0000001A
+MOTOR_0_OFF                       0000004C
+MOTOR_0_ON                        00000044
+MOTOR_MINUS30_OFF                 0000005C
+MOTOR_MINUS30_ON                  00000054
+MOTOR_PLUS30_OFF                  0000006C
+MOTOR_PLUS30_ON                   00000064
+MOTOR_PLUS90_OFF                  0000003C
+MOTOR_PLUS90_ON                   00000034
 NOT_PD                            00000003
 NOT_RBPU                          00000007
 NOT_TO                            00000004
@@ -398,20 +422,20 @@ RB0                               00000000
 RB1                               00000001
 RB2                               00000002
 RB3                               00000003
-RB4                               00000004
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  8
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE  9
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+RB4                               00000004
 RB5                               00000005
 RB6                               00000006
 RB7                               00000007
 RBIE                              00000003
 RBIF                              00000000
 RD                                00000000
-READ_SENSOR_VALUE                 00000030
+READ_SENSOR_VALUE                 0000001B
 RP0                               00000005
 RP1                               00000006
 STATUS                            00000003
@@ -442,7 +466,7 @@ WR                                00000001
 WREN                              00000002
 WRERR                             00000003
 Z                                 00000002
-_.org_1_0081                      00000081
+_.org_1_007C                      0000007C
 _CONFIG                           00002007
 _CP_OFF                           00003FFF
 _CP_ON                            0000000F
@@ -457,13 +481,13 @@ _IDLOC1                           00002001
 _IDLOC2                           00002002
 _IDLOC3                           00002003
 _LP_OSC                           00003FFC
-_PWRTE_OFF                        00003FFF
-MPASM 5.77                      MAINCODE.ASM   8-14-2021  20:45:56         PAGE  9
+MPASM 5.77                      MAINCODE.ASM   8-17-2021  10:01:18         PAGE 10
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+_PWRTE_OFF                        00003FFF
 _PWRTE_ON                         00003FF7
 _RC_OSC                           00003FFF
 _WDTE_OFF                         00003FFB
@@ -478,6 +502,6 @@ count3                            0000000E
 
 Errors   :     0
 Warnings :     0 reported,     0 suppressed
-Messages :     6 reported,     0 suppressed
+Messages :     5 reported,     0 suppressed
 
 

@@ -61,77 +61,94 @@ INIT:
         bsf         OPTION_REG, INTEDG  ; Interrupt on rising edge of
                                         ; RB0/INT pin
 
-; PORTA, PORTB pin modes
+; Set PORTA, PORTB pin modes
         movlw       b'11111111'         ; PORTB I/O pattern
         movwf       TRISB               ; Set PORTB pin modes
         
-        movlw       b'00000'            ; PORTA I/O pattern
+        movlw       b'00000000'         ; PORTA I/O pattern
         movwf       TRISA               ; Set PORTA pin modes
         
-        bcf         STATUS, 5           ; Bank 0 select
+        bcf         STATUS, RP0         ; Bank 0 select
 
 ; Initialize PORTA and PORTB
-        movlw       b'00000000'
+        movlw       b'00000000'         ; All zeros
         movwf       PORTB
-        movlw       b'00000'
+        movlw       b'00000000'         ; All zeros
         movwf       PORTA
+        
+; Initialize positions of the three motors to zero        
+        movlw       b'00000111'         ; turn on RA0, RA1, RA2
+        movwf       PORTA               ; 
+        call        MOTOR_0_ON          ;
+        
+        movlw       b'00000000'         ; turn off RA0, RA1, RA2
+        movwf       PORTA               ; 
+        call        MOTOR_0_OFF         ;
+        
+        call        DELAY_1S
         
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
 ; Routine "MAIN"
 MAIN:
-        ; Example usage of motor control
-        
-        ;Tip the platform +30
-        movlw       b'00000100'         ; turn on RA2
-	movwf       PORTA               ; 
-        call        MOTOR_PLUS30_ON     ;
-        
-        movlw       b'00000000'         ; turn off RA2
-        movwf       PORTA               ; 
-        call        MOTOR_PLUS30_OFF    ;
-        
-        call        DELAY_1S
-        
-        ;Make the platform horizontal
-        movlw       b'00000100'         ; turn on RA2
-        movwf       PORTA               ; 
-        call        MOTOR_0_ON          ;
-        
-        movlw       b'00000000'         ; turn off RA2
-        movwf       PORTA               ; 
-        call        MOTOR_0_OFF         ;
-        
-        call        DELAY_1S
-        
-        ;Tip the platform -30
-        movlw       b'00000100'         ; turn on RA2
-	movwf       PORTA               ; 
-        call        MOTOR_MINUS30_ON    ;
-        
-        movlw       b'00000000'         ; turn off RA2
-        movwf       PORTA               ; 
-        call        MOTOR_MINUS30_OFF   ;
-        
-        call        DELAY_1S
-        
-        ;Make the platform horizontal
-        movlw       b'00000100'         ; turn on RA2
-        movwf       PORTA               ; 
-        call        MOTOR_0_ON          ;
-        
-        movlw       b'00000000'         ; turn off RA2
-        movwf       PORTA               ; 
-        call        MOTOR_0_OFF         ;
-        
-        call        DELAY_1S
+        ; The MAIN loop
         
         goto        MAIN                ; Go to the MAIN routine again (loop)
 
 ;-------------------------------------------------------------------------------
 ; Subroutine "READ_SENSOR_VALUE"
 READ_SENSOR_VALUE:
+        ;        unsigned long Count;
+        ;        unsigned char i;
+    
+;        pinMode(DT, OUTPUT);
+        bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+        movlw       b'00000000'         ; PORTA I/O pattern
+        movwf       TRISA               ; Set PORTA pin modes
+        
+;        digitalWrite(DT,HIGH);
+;        digitalWrite(SCK,LOW);
+        bcf         STATUS, RP0         ; Bank 0 select
+        movlw       b'00010000'         ; turn on DOUT, turn off SCK
+        movwf       PORTA               ; 
+        
+        ; count = 0
+
+;        pinMode(DT, INPUT);
+        bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+        movlw       b'00010000'         ; PORTA I/O pattern
+        movwf       TRISA               ; Set PORTA pin modes
+        
+        bcf         STATUS, RP0         ; Bank 0 select
+
+;        while(digitalRead(DT));
+DOUT_1:
+        btfsc       PORTA, 4
+        goto        DOUT_1
+        
+        ;        for (i = 0; i < 24; i++)
+        ;        {
+        ;          digitalWrite(SCK, HIGH);
+        ;          Count = Count << 1;
+        ;          digitalWrite(SCK, LOW);
+        ;          if (digitalRead(DT)) 
+        ;              Count++;
+        ;        }
+
+;        digitalWrite(SCK,HIGH);
+        movlw       b'00001000'         ; turn on SCK
+        movwf       PORTA               ; 
+        
+        ; Count = Count^0x800000;
+        
+;        digitalWrite(SCK,LOW);
+        movlw       b'00000000'         ; turn off SCK
+        movwf       PORTA               ; 
+        
+        ; return(Count);
+        
+;-------------------------------------------------------------------------------
 ;        unsigned long Count;
 ;        unsigned char i;
 ;        pinMode(DT, OUTPUT);
@@ -140,25 +157,26 @@ READ_SENSOR_VALUE:
 ;        Count=0
 ;        pinMode(DT, INPUT);
 ;        while(digitalRead(DT));
-;        for (i=0;i<24;i++)
+;        for (i=0; i<24; i++)
 ;        {
-;          digitalWrite(SCK,HIGH);
-;          Count=Count<<1;
-;          digitalWrite(SCK,LOW);
-;          if(digitalRead(DT)) 
-;          Count++;
+;          digitalWrite(SCK, HIGH);
+;          Count = Count << 1;
+;          digitalWrite(SCK, LOW);
+;          if (digitalRead(DT)) 
+;               Count++;
 ;        }
 ;        digitalWrite(SCK,HIGH);
 ;        Count=Count^0x800000;
 ;        digitalWrite(SCK,LOW);
 ;        return(Count);
-    
+;-------------------------------------------------------------------------------
+        
         return
         
 ;-------------------------------------------------------------------------------
 ; ISR ""
 ISR:
-        ; Interrupt occurred
+        ; Interrupt occurred event
         retfie                          ; Return from interrupt
 ;-------------------------------------------------------------------------------
         
@@ -166,13 +184,13 @@ ISR:
 ; Delay subroutine (general)
 ; T = 18 + (count1-1)*3 + (count2-1)*770 + (count3-1)*197140 ns
 DELAY
-	decfsz      count1
+	decfsz      count1, f
 	goto        DELAY
 	
-	decfsz      count2
+	decfsz      count2, f
 	goto        DELAY
 	
-	decfsz      count3
+	decfsz      count3, f
 	goto        DELAY
 	
   	return
