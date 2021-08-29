@@ -70,7 +70,7 @@ main
     movlw b'11111101'
     movwf TRISB				; make the RB0 pin an input and RB1  pin output 
 					; RB0 => Serial Data line
-					; RB1 => Serial Clock line
+					; RA0 => Serial Clock line
 					
     movlw b'11111110'			; make the RA0 pin an output => this is for the clock pulses
     movwf TRISA 
