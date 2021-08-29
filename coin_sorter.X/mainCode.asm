@@ -27,11 +27,14 @@
 count1  equ         0x0c		; used in a decfsz
 count2  equ         0x0d		; used in a decfsz
 count3  equ         0x0e		; used in a decfsz
+sensorbitcounter    equ     0x0f
+TestCount           equ     0x10
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
 ; Constants
-
+;       define constants for weight thresholds
+;       Set the values of GPRs at INIT
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
@@ -62,10 +65,10 @@ INIT:
                                         ; RB0/INT pin
 
 ; Set PORTA, PORTB pin modes
-        movlw       b'11111111'         ; PORTB I/O pattern
+        movlw       b'00000000'         ; PORTB I/O pattern
         movwf       TRISB               ; Set PORTB pin modes
         
-        movlw       b'00000000'         ; PORTA I/O pattern
+        movlw       b'00001000'         ; PORTA I/O pattern (DOUT as input)
         movwf       TRISA               ; Set PORTA pin modes
         
         bcf         STATUS, RP0         ; Bank 0 select
@@ -93,6 +96,18 @@ INIT:
 ; Routine "MAIN"
 MAIN:
         ; The MAIN loop
+        call        READ_SENSOR_VALUE
+        
+        ; TODO:
+        ;           check for coin
+        ;           if coin, (try to use an interrupt for this)
+        ;               measure the weight
+        ;               open the gate
+        ;               close the gate
+        ;               wait
+        ;               turn the platform according to weight
+        ;               tilt the platform
+        ;               reset platform position
         
         goto        MAIN                ; Go to the MAIN routine again (loop)
 
@@ -110,14 +125,17 @@ READ_SENSOR_VALUE:
 ;        digitalWrite(DT,HIGH);
 ;        digitalWrite(SCK,LOW);
         bcf         STATUS, RP0         ; Bank 0 select
-        movlw       b'00010000'         ; turn on DOUT, turn off SCK
+        movlw       b'00001000'         ; turn on DOUT, turn off SCK
         movwf       PORTA               ; 
         
-        ; count = 0
+;        count = 0
+        movlw       b'00000000'
+        movwf       TestCount
+        
 
 ;        pinMode(DT, INPUT);
         bsf         STATUS, RP0         ; Bank 1 select (bit 5)
-        movlw       b'00010000'         ; PORTA I/O pattern
+        movlw       b'00001000'         ; PORTA I/O pattern
         movwf       TRISA               ; Set PORTA pin modes
         
         bcf         STATUS, RP0         ; Bank 0 select
@@ -127,17 +145,55 @@ DOUT_1:
         btfsc       PORTA, 4
         goto        DOUT_1
         
-        ;        for (i = 0; i < 24; i++)
-        ;        {
-        ;          digitalWrite(SCK, HIGH);
-        ;          Count = Count << 1;
-        ;          digitalWrite(SCK, LOW);
-        ;          if (digitalRead(DT)) 
-        ;              Count++;
-        ;        }
+        movlw       d'23'
+        movwf       sensorbitcounter
+        
+;        for (i = 0; i < 24; i++)
+BIT_READ:
+        decfsz      sensorbitcounter, f
+        goto        ITER
+        goto        BIT_READ_END
+        
+ITER:
+;          digitalWrite(SCK, HIGH);
+        movlw       b'00010000'         ; turn on SCK
+        movwf       PORTA               ; 
+        
+;          Count = Count << 1;
+        rlf         TestCount, f
+        
+;          digitalWrite(SCK, LOW);
+        movlw       b'00000000'         ; turn off SCK
+        movwf       PORTA               ; 
 
+;if (digitalRead(DT)) 
+        btfsc       PORTA, 3
+;              Count++;
+        incf        TestCount, f
+
+        
+        movf        TestCount, w
+        
+        ;movlw       b'11111111'
+        movwf       PORTB
+        
+        call        DELAY_1S
+        
+        movlw       b'00000000'
+        movwf       PORTB
+        
+        call        DELAY_1S
+        
+        
+        
+        
+        
+        goto        BIT_READ
+        
+BIT_READ_END:
+        
 ;        digitalWrite(SCK,HIGH);
-        movlw       b'00001000'         ; turn on SCK
+        movlw       b'00010000'         ; turn on SCK
         movwf       PORTA               ; 
         
         ; Count = Count^0x800000;
