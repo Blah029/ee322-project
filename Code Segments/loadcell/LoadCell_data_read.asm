@@ -27,6 +27,8 @@
     
     bcf INTCON,GIE			; disable the GIE to make the RB0 pin an input 
     
+    goto idle_state
+    
 loop
     
     decfsz 0x15 ,1 
