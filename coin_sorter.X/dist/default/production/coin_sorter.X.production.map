@@ -1,12 +1,12 @@
 MPLINK 5.08, LINKER
-Linker Map File - Created Tue Aug 24 02:00:02 2021
+Linker Map File - Created Thu Sep 09 18:57:48 2021
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
                 ---------  ---------  ---------  ---------  ---------
                    .org_0       code   0x000000    program   0x000002
                    .cinit    romdata   0x000001    program   0x000004
-                   .org_1       code   0x000004    program   0x00011e
+                   .org_1       code   0x000004    program   0x0001b4
 
 
 
@@ -14,34 +14,40 @@ Linker Map File - Created Tue Aug 24 02:00:02 2021
                                Start         End      
                            ---------   ---------      
                             0x000000    0x000002      
-                            0x000004    0x000092      
-            146 out of 1094 program addresses used, program memory utilization is 13%
+                            0x000004    0x0000dd      
+            221 out of 1094 program addresses used, program memory utilization is 20%
 
 
 
                               Symbols - Sorted by Name
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-                 BIT_READ   0x00002c    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-             BIT_READ_END   0x00003d    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                    DELAY   0x000043    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                 DELAY_1S   0x00008a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                   DOUT_1   0x000028    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                 INF_LOOP   0x000092    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             ADC_READ_BIT   0x000073    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             BIT_READ_END   0x000062    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+            BIT_READ_LOOP   0x000060    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                    DELAY   0x000086    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+              DELAY_100us   0x0000d5    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                 DELAY_1S   0x0000cd    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                      EOC   0x00005c    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+               IDLE_STATE   0x00005a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                 INF_LOOP   0x0000dd    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
                      INIT   0x000005    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                      ISR   0x000042    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                     ITER   0x00002f    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                     MAIN   0x00001a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-              MOTOR_0_OFF   0x000062    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-               MOTOR_0_ON   0x00005a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-        MOTOR_MINUS30_OFF   0x000072    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-         MOTOR_MINUS30_ON   0x00006a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-         MOTOR_PLUS30_OFF   0x000082    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-          MOTOR_PLUS30_ON   0x00007a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-         MOTOR_PLUS90_OFF   0x000052    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-          MOTOR_PLUS90_ON   0x00004a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-        READ_SENSOR_VALUE   0x00001c    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-             _.org_1_0092   0x000092    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+            ISR_ADC_READY   0x00005d    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                     MAIN   0x000017    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+              MOTOR_0_OFF   0x0000a5    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+               MOTOR_0_ON   0x00009d    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+        MOTOR_MINUS30_OFF   0x0000b5    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+         MOTOR_MINUS30_ON   0x0000ad    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+         MOTOR_PLUS30_OFF   0x0000c5    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+          MOTOR_PLUS30_ON   0x0000bd    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+         MOTOR_PLUS90_OFF   0x000095    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+          MOTOR_PLUS90_ON   0x00008d    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                POST_PROC   0x000063    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             PROCESS_DATA   0x00002b    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+            READ_FROM_ADC   0x000045    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                      SOC   0x000049    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             _.org_1_00DD   0x0000dd    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+               _DISP_BITS   0x00002c    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
 
 
 
@@ -49,24 +55,30 @@ Linker Map File - Created Tue Aug 24 02:00:02 2021
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
                      INIT   0x000005    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                     MAIN   0x00001a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-        READ_SENSOR_VALUE   0x00001c    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                   DOUT_1   0x000028    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                 BIT_READ   0x00002c    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                     ITER   0x00002f    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-             BIT_READ_END   0x00003d    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                      ISR   0x000042    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                    DELAY   0x000043    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-          MOTOR_PLUS90_ON   0x00004a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-         MOTOR_PLUS90_OFF   0x000052    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-               MOTOR_0_ON   0x00005a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-              MOTOR_0_OFF   0x000062    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-         MOTOR_MINUS30_ON   0x00006a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-        MOTOR_MINUS30_OFF   0x000072    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-          MOTOR_PLUS30_ON   0x00007a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-         MOTOR_PLUS30_OFF   0x000082    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                 DELAY_1S   0x00008a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-                 INF_LOOP   0x000092    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
-             _.org_1_0092   0x000092    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                     MAIN   0x000017    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             PROCESS_DATA   0x00002b    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+               _DISP_BITS   0x00002c    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+            READ_FROM_ADC   0x000045    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                      SOC   0x000049    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+               IDLE_STATE   0x00005a    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                      EOC   0x00005c    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+            ISR_ADC_READY   0x00005d    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+            BIT_READ_LOOP   0x000060    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             BIT_READ_END   0x000062    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                POST_PROC   0x000063    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             ADC_READ_BIT   0x000073    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                    DELAY   0x000086    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+          MOTOR_PLUS90_ON   0x00008d    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+         MOTOR_PLUS90_OFF   0x000095    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+               MOTOR_0_ON   0x00009d    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+              MOTOR_0_OFF   0x0000a5    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+         MOTOR_MINUS30_ON   0x0000ad    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+        MOTOR_MINUS30_OFF   0x0000b5    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+          MOTOR_PLUS30_ON   0x0000bd    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+         MOTOR_PLUS30_OFF   0x0000c5    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                 DELAY_1S   0x0000cd    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+              DELAY_100us   0x0000d5    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+                 INF_LOOP   0x0000dd    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
+             _.org_1_00DD   0x0000dd    program     static D:\wkdir\sub\mplabx\coin_sorter.X\mainCode.asm
 
 
