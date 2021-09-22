@@ -30,12 +30,12 @@ init									; initialisation
 	movwf		inByte2					;
 	movlw		d'0'					; clear all flags
 	movwf		flags					;
-    goto		main
+    goto main
     
 main									; main code
     ; insert code
 	call checkTolerance
-	goto		main
+	goto main
 	
 checkTolerance
 	bsf			STATUS,		RP0			; access bank 0
