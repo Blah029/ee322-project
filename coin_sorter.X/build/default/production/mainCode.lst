@@ -1,4 +1,4 @@
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  1
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -34,11 +34,11 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00018 
                       00019 ;-------------------------------------------------------------------------------
                       00020 ; Pin Designations
-                      00021 ; * RA0: Servo Motor 1
-                      00022 ; * RA1: Servo Motor 2
-                      00023 ; * RA2: Servo Motor 3
-                      00024 ; * RA3: Connected to DOUT (Data line Out) of HX711 module
-                      00025 ; * RB0: Connected to  SCK  (Serial Clock) of HX711 module
+                      00021 ; * RA0: Servo Motor 1 (COIN_GATE)
+                      00022 ; * RA1: Servo Motor 2 (ROTATE)
+                      00023 ; * RA2: Servo Motor 3 (TILT)
+                      00024 ; * RB0: Connected to DOUT (Data line Out) of HX711 module
+                      00025 ; * RA3: Connected to  SCK  (Serial Clock) of HX711 module
                       00026 ;-------------------------------------------------------------------------------
                       00027 
                       00028 ;-------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00041 ;                                       [  Byte2 ,  Byte1 ,  Byte0 ]
   00000010            00042 Byte2   equ         0x10
   00000011            00043 Byte1   equ         0x11
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  2
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -101,7 +101,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00076 ; Set Interrupt Settings
 0006   160B           00077         bsf         INTCON, INTE        ; Enable the RB0/INT interrupt
                       00078         
-0007   178B           00079         bsf         INTCON, GIE         ; Disable all un-masked (global)
+0007   138B           00079         bcf         INTCON, GIE         ; Disable all un-masked (global)
                       00080                                         ; interrupts (turn this on only
                       00081                                         ; when needed)
                       00082                                         
@@ -116,7 +116,7 @@ Message[302]: Register in operand not in bank 0.  Ensure that bank bits are corr
                       00090 ; Set PORTA, PORTB pin modes (default)
 000A   3001           00091         movlw       b'00000001'         ; PORTB I/O pattern
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  3
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -159,7 +159,7 @@ Message[302]: Register in operand not in bank 0.  Ensure that bank bits are corr
 0017                  00124 MAIN:
 0017   2???           00125         call        READ_FROM_ADC       ; Read a raw value from ADC
                       00126         
-0018   1585           00127         bsf         PORTA, RA3          ; Turn off ADC
+0018   1585           00127         bsf         PORTA, RA3          ; ADC: Power down mode
 0019   2???           00128         call        DELAY_100us         ;
                       00129         
                       00130         ; Display the read bits
@@ -175,7 +175,7 @@ Message[302]: Register in operand not in bank 0.  Ensure that bank bits are corr
                       00140         
 0022   0812           00141         movf        Byte0, W            ; Byte0
 0023   0095           00142         movwf       tmp1                ;
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  4
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  4
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -189,7 +189,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0028   2???           00148         call        _DISP_BITS          ;
 0029   2???           00149         call        DELAY_1S            ;
                       00150         
-002A   1185           00151         bcf         PORTA, RA3          ; Resume ADC
+002A   1185           00151         bcf         PORTA, RA3          ; ADC: Power up mode
                       00152         
 002B                  00153 PROCESS_DATA:
                       00154         ; Process Byte2, Byte1, Byte0
@@ -234,7 +234,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0043   1786           00192         bsf         PORTB, RB7
                       00193         
 0044   0008           00194         return
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  5
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  5
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -247,7 +247,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0045                  00199 READ_FROM_ADC:
 0045   1683           00200         bsf         STATUS, RP0         ; Switch to Bank 1 (bit 5)
                       00201         
-0046   178B           00202         bsf         INTCON, GIE         ; Disable all un-masked (global)
+0046   138B           00202         bcf         INTCON, GIE         ; Disable all un-masked (global)
                       00203                                         ; interrupts (turn this on only
                       00204                                         ; when needed)
                       00205                                         
@@ -258,344 +258,360 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0049   3019           00210         movlw       d'25'               ; Reset the bit index to 25
 004A   008F           00211         movwf       BitIdx              ; (to count 24 bits)
                       00212         
-004B   3000           00213         movlw       d'0'                ; Reset the 24-bit number
-004C   0090           00214         movwf       Byte2               ; Byte2
-004D   3000           00215         movlw       d'0'
-004E   0091           00216         movwf       Byte1               ; Byte1
-004F   3000           00217         movlw       d'0'
-0050   0092           00218         movwf       Byte0               ; Byte0
-                      00219         
-0051   1283           00220         bcf         STATUS, RP0         ; Switch to Bank 0 (bit 5)
-                      00221         
-0052   3000           00222         movlw       b'00000000'         ; SCK: 0 (Clear SCK line)               
-0053   0085           00223         movwf       PORTA               ; RA0, RA1                              
-                      00224         
-0054   3001           00225         movlw       b'00000001'         ; DOUT: 1 (Set this to 1.               
-                      00226                                         ; Interrupt will then trigger
-0055   0086           00227         movwf       PORTB               ; at a falling edge of this pin)
-                      00228         
-0056   1014           00229         bcf         Flags, 0            ; Clear EOC flag
-                      00230         
-0057   1683           00231         bsf         STATUS, RP0         ; Bank 1 select (bit 5)
-0058   178B           00232         bsf         INTCON, GIE         ; Enable GIE to make the
-                      00233                                         ; RB0 pin an interrupt pin
-0059   1283           00234         bcf         STATUS, RP0         ; Bank 0 select (bit 5)
-                      00235 
-                      00236 ; Wait until ADC is ready (i.e. wait until RB0 is falling-edge triggered)
-005A                  00237 IDLE_STATE:
-005A   1C14           00238         btfss       Flags, 0            ; Check if the EOC flag is set
-005B   2???           00239         goto        IDLE_STATE          ; Go to the MAIN routine again (loop)
+004B   0190           00213         clrf        Byte2               ; Clear Byte2 register
+004C   0191           00214         clrf        Byte1               ; Clear Byte2 register
+004D   0192           00215         clrf        Byte0               ; Clear Byte2 register
+                      00216         
+                      00217 ;        movlw       d'0'                ; Reset the 24-bit number                   ; CORRECTION: USE C
+                            LEAR INSTRUCTION
+                      00218 ;        movwf       Byte2               ; Byte2
+                      00219 ;        movlw       d'0'
+                      00220 ;        movwf       Byte1               ; Byte1
+                      00221 ;        movlw       d'0'
+                      00222 ;        movwf       Byte0               ; Byte0
+                      00223         
+                      00224         ;bcf         STATUS, RP0         ; Switch to Bank 0 (bit 5)                  ; COMMENTED: DUPLIC
+                            ATE
+                      00225         
+                      00226 ; Turn on the ADC
+004E   3000           00227         movlw       b'00000000'         ; SCK: 0 (Clear SCK line)
+004F   0085           00228         movwf       PORTA               ; RA0, RA1                              
+                      00229         
+0050   3001           00230         movlw       b'00000001'         ; DOUT: 1 (Set this to 1.               
+                      00231                                         ; Interrupt will then trigger
+0051   0086           00232         movwf       PORTB               ; at a falling edge of this pin)
+                      00233         
+0052   1014           00234         bcf         Flags, 0            ; Clear EOC flag
+                      00235         
+0053   1683           00236         bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+0054   178B           00237         bsf         INTCON, GIE         ; Enable GIE to make the
+                      00238                                         ; RB0 pin an interrupt pin
+0055   1283           00239         bcf         STATUS, RP0         ; Bank 0 select (bit 5)
                       00240 
-005C                  00241 EOC: ; End of conversion
-005C   0008           00242         return                          ; If EOC flag is set, then a single
-                      00243                                         ; read cycle is completed. Go back
-                      00244                                         ; to the MAIN routine.
-                      00245 ;-------------------------------------------------------------------------------
-                      00246 
-                      00247 ;-------------------------------------------------------------------------------
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  6
+                      00241 ; Wait until ADC is ready (i.e. wait until RB0 is falling-edge triggered)
+0056                  00242 IDLE_STATE:
+0056   1C14           00243         btfss       Flags, 0            ; Check if the EOC flag is set
+0057   2???           00244         goto        IDLE_STATE          ; Go to the MAIN routine again (loop)
+                      00245 
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  6
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00248 ; ISR_ADC_READY: Occurs when ADC is ready to send data
-005D                  00249 ISR_ADC_READY:
-005D   1683           00250         bsf         STATUS, RP0         ; Bank 1 select (bit 5)
-005E   138B           00251         bcf         INTCON, GIE         ; Disable GIE to make the RB0 pin
-                      00252                                         ; temporarily an input
-005F   1283           00253         bcf         STATUS, RP0         ; Bank 0 select (bit 5)
-                      00254                                         
-0060                  00255 BIT_READ_LOOP:
-0060   0B8F           00256         decfsz      BitIdx, f           ; Decrement the current bit index
-0061   2???           00257         goto        ADC_READ_BIT        ; Get the latest bit from the ADC
-                      00258         
-0062                  00259 BIT_READ_END:
-0062   1414           00260         bsf         Flags, 0            ; Set EOC flag to mark the EOC
-                      00261 
-                      00262 ; Post-processing of received data
-0063                  00263 POST_PROC:
-                      00264 ; XOR the raw output
-0063   3008           00265         movlw       b'00001000'         ; Turn on the SCK pin of HX711
-0064   0085           00266         movwf       PORTA               ; 
-0065   0000           00267         nop
-                      00268         
-0066   0810           00269         movf        Byte2, W            ;                                           ; Reason for XORing
-0067   3A80           00270         xorlw       b'10000000'         ; XOR Byte2 with 0x80 (10000000)
-0068   0090           00271         movwf       Byte2               ; 
-                      00272         
-0069   0811           00273         movf        Byte1, W            ; 
-006A   3A00           00274         xorlw       b'00000000'         ; XOR Byte1 with 0x00 (00000000)
-006B   0091           00275         movwf       Byte1               ;
-                      00276         
-006C   0812           00277         movf        Byte0, W            ;
-006D   3A00           00278         xorlw       b'00000000'         ; XOR Byte0 with 0x00 (00000000)
-006E   0092           00279         movwf       Byte0               ;
-                      00280         
-006F   3000           00281         movlw       b'00000000'         ; Turn off the SCK pin of HX711
-0070   0085           00282         movwf       PORTA               ;
-0071   0000           00283         nop                             ;
-                      00284         
-0072   0008           00285         return                          ; Return from ISR_ADC_READY
-                      00286 ;-------------------------------------------------------------------------------
-                      00287 
-                      00288 ;-------------------------------------------------------------------------------
-                      00289 ; ADC_READ_BIT: Read a bit from the ADC
-0073                  00290 ADC_READ_BIT:
-                      00291 
-                      00292 ; Left-shift Byte2, Byte1 and Byte0 by one bit
-0073   0D90           00293         rlf         Byte2, f            ; Left-shift Byte2
-                      00294         
-0074   1010           00295         bcf         Byte2, 0            ; Clear the LSB of Byte2
-                      00296         
-0075   0D91           00297         rlf         Byte1, f            ; Left-shift Byte1
-                      00298         
-0076   1803           00299         btfsc       STATUS, C           ; Get the carry bit of Byte1 after
-                      00300                                         ; Left-shifting
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  7
+0058                  00246 EOC: ; End of conversion
+0058   0008           00247         return                          ; If EOC flag is set, then a single
+                      00248                                         ; read cycle is completed. Go back
+                      00249                                         ; to the MAIN routine.
+                      00250 ;-------------------------------------------------------------------------------
+                      00251 
+                      00252 ;-------------------------------------------------------------------------------
+                      00253 ; ISR_ADC_READY: Occurs when ADC is ready to send data
+0059                  00254 ISR_ADC_READY:
+0059   1683           00255         bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+005A   138B           00256         bcf         INTCON, GIE         ; Disable GIE to make the RB0 pin
+                      00257                                         ; temporarily an input
+005B   1283           00258         bcf         STATUS, RP0         ; Bank 0 select (bit 5)
+                      00259 
+005C                  00260 BIT_READ_LOOP:
+005C   0B8F           00261         decfsz      BitIdx, f           ; Decrement the current bit index
+005D   2???           00262         goto        ADC_READ_BIT        ; Get the latest bit from the ADC
+                      00263 
+005E                  00264 BIT_READ_END:
+005E   1414           00265         bsf         Flags, 0            ; Set EOC flag to mark the EOC
+                      00266 
+                      00267 ; Post-processing of received data
+005F                  00268 POST_PROC:
+                      00269 ; XOR the raw output
+005F   3008           00270         movlw       b'00001000'         ; Turn on the SCK pin of HX711
+0060   0085           00271         movwf       PORTA               ; 
+0061   0000           00272         nop
+                      00273         
+0062   0810           00274         movf        Byte2, W            ;                                           ; Reason for XORing?
+0063   3A80           00275         xorlw       b'10000000'         ; XOR Byte2 with 0x80 (10000000)
+0064   0090           00276         movwf       Byte2               ; 
+                      00277         
+0065   0811           00278         movf        Byte1, W            ; 
+0066   3A00           00279         xorlw       b'00000000'         ; XOR Byte1 with 0x00 (00000000)
+0067   0091           00280         movwf       Byte1               ;
+                      00281         
+0068   0812           00282         movf        Byte0, W            ;
+0069   3A00           00283         xorlw       b'00000000'         ; XOR Byte0 with 0x00 (00000000)
+006A   0092           00284         movwf       Byte0               ;
+                      00285         
+006B   3000           00286         movlw       b'00000000'         ; Turn off the SCK pin of HX711
+006C   0085           00287         movwf       PORTA               ;
+006D   0000           00288         nop                             ;
+                      00289         
+006E   0008           00290         return                          ; Return from ISR_ADC_READY
+                      00291                                         ; Goes back to IDLE_STATE (EOC)
+                      00292 ;-------------------------------------------------------------------------------
+                      00293 
+                      00294 ;-------------------------------------------------------------------------------
+                      00295 ; ADC_READ_BIT: Read a bit from the ADC
+006F                  00296 ADC_READ_BIT:
+                      00297 
+                      00298 ; Left-shift Byte2, Byte1 and Byte0 by one bit
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  7
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00301                                         
-0077   1410           00302         bsf         Byte2, 0            ; Set the LSB of Byte2 equal to the
-                      00303                                         ; carry of Byte1
-                      00304         
-0078   0D92           00305         rlf         Byte0, f            ; Left-shift Byte0
-                      00306         
-0079   1011           00307         bcf         Byte1, 0            ; Clear the LSB of Byte1
-                      00308         
-007A   1803           00309         btfsc       STATUS, C           ; Get the carry bit of Byte0 after
-                      00310                                         ; Left-shifting
-                      00311                                         
-007B   1411           00312         bsf         Byte1, 0            ; Set the LSB of Byte1 equal to the
-                      00313                                         ; carry of Byte0
-                      00314         
-007C   1012           00315         bcf         Byte0, 0            ; Clear the LSB of Byte0
-                      00316                                         
-                      00317 ; Get the incoming bit and assign it to the LSB of Byte0
-                      00318 ; Apply a clock pulse
-007D   3008           00319         movlw       b'00001000'         ; Turn on the SCK pin of HX711
-007E   0085           00320         movwf       PORTA               ;
-007F   0000           00321         nop
-                      00322         
-0080   3000           00323         movlw       b'00000000'         ; Turn off the SCK pin of HX711
-0081   0085           00324         movwf       PORTA
-0082   0000           00325         nop
-                      00326         
-0083   1806           00327         btfsc       PORTB, RB0          ; Capture the incoming bit from the
-                      00328                                         ; ADC by checking whether it is 1
-                      00329         
-0084   1412           00330         bsf         Byte0, 0            ; Set the LSB of the 24-bit number
-                      00331                                         ; with the new bit (if it is 1)
-                      00332         
-0085   2???           00333         goto        BIT_READ_LOOP
-                      00334 ;-------------------------------------------------------------------------------
-                      00335         
-                      00336 ;-------------------------------------------------------------------------------
-                      00337 ; DELAY: Generic delay subroutine
-                      00338 ; T = 18 + (count1-1)*3 + (count2-1)*770 + (count3-1)*197140 ns
-0086                  00339 DELAY
-0086   0B8C           00340         decfsz      count1, f
-0087   2???           00341         goto        DELAY
-                      00342         
-0088   0B8D           00343         decfsz      count2, f
-0089   2???           00344         goto        DELAY
-                      00345         
-008A   0B8E           00346         decfsz      count3, f
-008B   2???           00347         goto        DELAY
-                      00348         
-008C   0008           00349         return
+006F   0D92           00299         rlf         Byte0, f            ; Left-shift Byte0
+0070   0D91           00300         rlf         Byte1, f            ; Left-shift Byte1
+0071   0D90           00301         rlf         Byte2, f            ; Left-shift Byte2
+                      00302         
+                      00303         
+                      00304     
+                      00305 ;        rlf         Byte2, f            ; Left-shift Byte2
+                      00306 ;        
+                      00307 ;        bcf         Byte2, 0            ; Clear the LSB of Byte2
+                      00308 ;        
+                      00309 ;        rlf         Byte1, f            ; Left-shift Byte1
+                      00310 ;        
+                      00311 ;        btfsc       STATUS, C           ; Get the carry bit of Byte1 after
+                      00312 ;                                        ; Left-shifting
+                      00313 ;                                        
+                      00314 ;        bsf         Byte2, 0            ; Set the LSB of Byte2 equal to the
+                      00315 ;                                        ; carry of Byte1
+                      00316 ;        
+                      00317 ;        rlf         Byte0, f            ; Left-shift Byte0
+                      00318 ;        
+                      00319 ;        bcf         Byte1, 0            ; Clear the LSB of Byte1
+                      00320 ;        
+                      00321 ;        btfsc       STATUS, C           ; Get the carry bit of Byte0 after
+                      00322 ;                                        ; Left-shifting
+                      00323 ;                                        
+                      00324 ;        bsf         Byte1, 0            ; Set the LSB of Byte1 equal to the
+                      00325 ;                                        ; carry of Byte0
+                      00326                                         
+                      00327                                         
+                      00328         
+0072   1012           00329         bcf         Byte0, 0            ; Clear the LSB of Byte0
+                      00330                                         
+                      00331 ; Get the incoming bit and assign it to the LSB of Byte0
+                      00332 ; Apply a clock pulse
+0073   3008           00333         movlw       b'00001000'         ; Turn on the SCK pin of HX711
+0074   0085           00334         movwf       PORTA               ;
+0075   0000           00335         nop
+                      00336         
+0076   3000           00337         movlw       b'00000000'         ; Turn off the SCK pin of HX711
+0077   0085           00338         movwf       PORTA
+0078   0000           00339         nop
+                      00340         
+0079   1806           00341         btfsc       PORTB, RB0          ; Capture the incoming bit from the
+                      00342                                         ; ADC by checking whether it is 1
+                      00343         
+007A   1412           00344         bsf         Byte0, 0            ; Set the LSB of the 24-bit number
+                      00345                                         ; with the new bit (if it is 1)
+                      00346         
+007B   2???           00347         goto        BIT_READ_LOOP
+                      00348 ;-------------------------------------------------------------------------------
+                      00349 
                       00350 ;-------------------------------------------------------------------------------
-                      00351 
-                      00352 ;-------------------------------------------------------------------------------
-                      00353 ; Motor Controller subroutines
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  8
+                      00351 ; DELAY: Generic delay subroutine
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  8
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-008D                  00354 MOTOR_PLUS90_ON:
-008D   3095           00355         movlw       d'149'              ; set layer 1 delay counter
-008E   008C           00356         movwf       count1              ; 
-008F   3003           00357         movlw       d'3'                ; set layer 2 delay counter
-0090   008D           00358         movwf       count2              ; 
-0091   3001           00359         movlw       d'1'                ; set layer 3 delay counter
-0092   008E           00360         movwf       count3              ; 
-0093   2???           00361         call        DELAY               ; keep the set-up delay
+                      00352 ; T = 18 + (count1-1)*3 + (count2-1)*770 + (count3-1)*197140 ns
+007C                  00353 DELAY
+007C   0B8C           00354         decfsz      count1, f
+007D   2???           00355         goto        DELAY
+                      00356         
+007E   0B8D           00357         decfsz      count2, f
+007F   2???           00358         goto        DELAY
+                      00359         
+0080   0B8E           00360         decfsz      count3, f
+0081   2???           00361         goto        DELAY
                       00362         
-0094   0008           00363         return
-                      00364         
-0095                  00365 MOTOR_PLUS90_OFF:
-0095   3001           00366         movlw       d'1'                ; set layer 1 delay counter
-0096   008C           00367         movwf       count1              ; 
-0097   3001           00368         movlw       d'1'                ; set layer 2 delay counter
-0098   008D           00369         movwf       count2              ; 
-0099   3003           00370         movlw       d'3'                ; set layer 3 delay counter
-009A   008E           00371         movwf       count3              ; 
-009B   2???           00372         call        DELAY               ; keep the set-up delay
-                      00373         
-009C   0008           00374         return
-                      00375 
-009D                  00376 MOTOR_0_ON:
-009D   30EE           00377         movlw       d'238'              ; set layer 1 delay counter
-009E   008C           00378         movwf       count1              ; 
-009F   3002           00379         movlw       d'2'                ; set layer 2 delay counter
-00A0   008D           00380         movwf       count2              ; 
-00A1   3001           00381         movlw       d'1'                ; set layer 3 delay counter
-00A2   008E           00382         movwf       count3              ; 
-00A3   2???           00383         call        DELAY               ; keep the set-up delay
-                      00384         
-00A4   0008           00385         return
-                      00386         
-00A5                  00387 MOTOR_0_OFF:
-00A5   30A1           00388         movlw       d'161'              ; set layer 1 delay counter
-00A6   008C           00389         movwf       count1              ; 
-00A7   3001           00390         movlw       d'1'                ; set layer 2 delay counter
-00A8   008D           00391         movwf       count2              ; 
-00A9   3001           00392         movlw       d'1'                ; set layer 3 delay counter
-00AA   008E           00393         movwf       count3              ; 
-00AB   2???           00394         call        DELAY               ; keep the set-up delay
-                      00395         
-00AC   0008           00396         return
-                      00397         
-00AD                  00398 MOTOR_MINUS30_ON:
-00AD   30B7           00399         movlw       d'183'              ; set layer 1 delay counter
-00AE   008C           00400         movwf       count1              ; 
-00AF   3002           00401         movlw       d'2'                ; set layer 2 delay counter
-00B0   008D           00402         movwf       count2              ; 
-00B1   3001           00403         movlw       d'1'                ; set layer 3 delay counter
-00B2   008E           00404         movwf       count3              ; 
-00B3   2???           00405         call        DELAY               ; keep the set-up delay
-                      00406         
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE  9
+0082   0008           00363         return
+                      00364 ;-------------------------------------------------------------------------------
+                      00365 
+                      00366 ;-------------------------------------------------------------------------------
+                      00367 ; Motor Controller subroutines
+0083                  00368 MOTOR_PLUS90_ON:
+0083   3095           00369         movlw       d'149'              ; set layer 1 delay counter
+0084   008C           00370         movwf       count1              ; 
+0085   3003           00371         movlw       d'3'                ; set layer 2 delay counter
+0086   008D           00372         movwf       count2              ; 
+0087   3001           00373         movlw       d'1'                ; set layer 3 delay counter
+0088   008E           00374         movwf       count3              ; 
+0089   2???           00375         call        DELAY               ; keep the set-up delay
+                      00376         
+008A   0008           00377         return
+                      00378         
+008B                  00379 MOTOR_PLUS90_OFF:
+008B   3001           00380         movlw       d'1'                ; set layer 1 delay counter
+008C   008C           00381         movwf       count1              ; 
+008D   3001           00382         movlw       d'1'                ; set layer 2 delay counter
+008E   008D           00383         movwf       count2              ; 
+008F   3003           00384         movlw       d'3'                ; set layer 3 delay counter
+0090   008E           00385         movwf       count3              ; 
+0091   2???           00386         call        DELAY               ; keep the set-up delay
+                      00387         
+0092   0008           00388         return
+                      00389 
+0093                  00390 MOTOR_0_ON:
+0093   30EE           00391         movlw       d'238'              ; set layer 1 delay counter
+0094   008C           00392         movwf       count1              ; 
+0095   3002           00393         movlw       d'2'                ; set layer 2 delay counter
+0096   008D           00394         movwf       count2              ; 
+0097   3001           00395         movlw       d'1'                ; set layer 3 delay counter
+0098   008E           00396         movwf       count3              ; 
+0099   2???           00397         call        DELAY               ; keep the set-up delay
+                      00398         
+009A   0008           00399         return
+                      00400         
+009B                  00401 MOTOR_0_OFF:
+009B   30A1           00402         movlw       d'161'              ; set layer 1 delay counter
+009C   008C           00403         movwf       count1              ; 
+009D   3001           00404         movlw       d'1'                ; set layer 2 delay counter
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE  9
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-00B4   0008           00407         return
-                      00408         
-00B5                  00409 MOTOR_MINUS30_OFF:
-00B5   30D9           00410         movlw       d'217'              ; set layer 1 delay counter
-00B6   008C           00411         movwf       count1              ; 
-00B7   3001           00412         movlw       d'1'                ; set layer 2 delay counter
-00B8   008D           00413         movwf       count2              ; 
-00B9   3001           00414         movlw       d'1'                ; set layer 3 delay counter
-00BA   008E           00415         movwf       count3              ; 
-00BB   2???           00416         call        DELAY               ; keep the set-up delay
-                      00417         
-00BC   0008           00418         return
-                      00419 
-00BD                  00420 MOTOR_PLUS30_ON:
-00BD   3025           00421         movlw       d'37'               ; set layer 1 delay counter
-00BE   008C           00422         movwf       count1              ; 
-00BF   3003           00423         movlw       d'3'                ; set layer 2 delay counter
-00C0   008D           00424         movwf       count2              ; 
-00C1   3001           00425         movlw       d'1'                ; set layer 3 delay counter
-00C2   008E           00426         movwf       count3              ; 
-00C3   2???           00427         call        DELAY               ; keep the set-up delay
-                      00428         
-00C4   0008           00429         return
-                      00430         
-00C5                  00431 MOTOR_PLUS30_OFF:
-00C5   306A           00432         movlw       d'106'              ; set layer 1 delay counter
-00C6   008C           00433         movwf       count1              ; 
-00C7   3001           00434         movlw       d'1'                ; set layer 2 delay counter
-00C8   008D           00435         movwf       count2              ; 
-00C9   3001           00436         movlw       d'1'                ; set layer 3 delay counter
-00CA   008E           00437         movwf       count3              ; 
-00CB   2???           00438         call        DELAY               ; keep the set-up delay
-                      00439         
-00CC   0008           00440         return
-                      00441         
-00CD                  00442 DELAY_1S:
-00CD   308E           00443         movlw       d'142'              ; set layer 1 delay counter
-00CE   008C           00444         movwf       count1              ; 
-00CF   3013           00445         movlw       d'19'               ; set layer 2 delay counter
-00D0   008D           00446         movwf       count2              ; 
-00D1   3006           00447         movlw       d'6'                ; set layer 3 delay counter
-00D2   008E           00448         movwf       count3              ; 
-00D3   2???           00449         call        DELAY               ; keep the set-up delay
-                      00450         
-00D4   0008           00451         return
-                      00452 
-00D5                  00453 DELAY_100us: ; For ADC power off
-00D5   301C           00454         movlw       d'28'               ; set layer 1 delay counter
-00D6   008C           00455         movwf       count1              ; 
-00D7   3001           00456         movlw       d'1'                ; set layer 2 delay counter
-00D8   008D           00457         movwf       count2              ; 
-00D9   3001           00458         movlw       d'1'                ; set layer 3 delay counter
-00DA   008E           00459         movwf       count3              ; 
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE 10
+009E   008D           00405         movwf       count2              ; 
+009F   3001           00406         movlw       d'1'                ; set layer 3 delay counter
+00A0   008E           00407         movwf       count3              ; 
+00A1   2???           00408         call        DELAY               ; keep the set-up delay
+                      00409         
+00A2   0008           00410         return
+                      00411         
+00A3                  00412 MOTOR_MINUS30_ON:
+00A3   30B7           00413         movlw       d'183'              ; set layer 1 delay counter
+00A4   008C           00414         movwf       count1              ; 
+00A5   3002           00415         movlw       d'2'                ; set layer 2 delay counter
+00A6   008D           00416         movwf       count2              ; 
+00A7   3001           00417         movlw       d'1'                ; set layer 3 delay counter
+00A8   008E           00418         movwf       count3              ; 
+00A9   2???           00419         call        DELAY               ; keep the set-up delay
+                      00420         
+00AA   0008           00421         return
+                      00422         
+00AB                  00423 MOTOR_MINUS30_OFF:
+00AB   30D9           00424         movlw       d'217'              ; set layer 1 delay counter
+00AC   008C           00425         movwf       count1              ; 
+00AD   3001           00426         movlw       d'1'                ; set layer 2 delay counter
+00AE   008D           00427         movwf       count2              ; 
+00AF   3001           00428         movlw       d'1'                ; set layer 3 delay counter
+00B0   008E           00429         movwf       count3              ; 
+00B1   2???           00430         call        DELAY               ; keep the set-up delay
+                      00431         
+00B2   0008           00432         return
+                      00433 
+00B3                  00434 MOTOR_PLUS30_ON:
+00B3   3025           00435         movlw       d'37'               ; set layer 1 delay counter
+00B4   008C           00436         movwf       count1              ; 
+00B5   3003           00437         movlw       d'3'                ; set layer 2 delay counter
+00B6   008D           00438         movwf       count2              ; 
+00B7   3001           00439         movlw       d'1'                ; set layer 3 delay counter
+00B8   008E           00440         movwf       count3              ; 
+00B9   2???           00441         call        DELAY               ; keep the set-up delay
+                      00442         
+00BA   0008           00443         return
+                      00444         
+00BB                  00445 MOTOR_PLUS30_OFF:
+00BB   306A           00446         movlw       d'106'              ; set layer 1 delay counter
+00BC   008C           00447         movwf       count1              ; 
+00BD   3001           00448         movlw       d'1'                ; set layer 2 delay counter
+00BE   008D           00449         movwf       count2              ; 
+00BF   3001           00450         movlw       d'1'                ; set layer 3 delay counter
+00C0   008E           00451         movwf       count3              ; 
+00C1   2???           00452         call        DELAY               ; keep the set-up delay
+                      00453         
+00C2   0008           00454         return
+                      00455         
+00C3                  00456 DELAY_1S:
+00C3   308E           00457         movlw       d'142'              ; set layer 1 delay counter
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE 10
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-00DB   2???           00460         call        DELAY               ; keep the set-up delay
-                      00461         
-00DC   0008           00462         return
-                      00463 
-                      00464 ;-------------------------------------------------------------------------------
-                      00465 
-00DD                  00466 INF_LOOP:
-00DD   2???           00467         goto    $
-                      00468 
-                      00469 ;-------------------------------------------------------------------------------
-                      00470 
-                      00471 ;-------------------------------------------------------------------------------
-                      00472         end
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE 11
+00C4   008C           00458         movwf       count1              ; 
+00C5   3013           00459         movlw       d'19'               ; set layer 2 delay counter
+00C6   008D           00460         movwf       count2              ; 
+00C7   3006           00461         movlw       d'6'                ; set layer 3 delay counter
+00C8   008E           00462         movwf       count3              ; 
+00C9   2???           00463         call        DELAY               ; keep the set-up delay
+                      00464         
+00CA   0008           00465         return
+                      00466 
+00CB                  00467 DELAY_100us: ; For ADC power off
+00CB   301C           00468         movlw       d'28'               ; set layer 1 delay counter
+00CC   008C           00469         movwf       count1              ; 
+00CD   3001           00470         movlw       d'1'                ; set layer 2 delay counter
+00CE   008D           00471         movwf       count2              ; 
+00CF   3001           00472         movlw       d'1'                ; set layer 3 delay counter
+00D0   008E           00473         movwf       count3              ; 
+00D1   2???           00474         call        DELAY               ; keep the set-up delay
+                      00475         
+00D2   0008           00476         return
+                      00477 
+                      00478 ;-------------------------------------------------------------------------------
+                      00479 
+00D3                  00480 INF_LOOP:
+00D3   2???           00481         goto    $
+                      00482 
+                      00483 ;-------------------------------------------------------------------------------
+                      00484 
+                      00485 ;-------------------------------------------------------------------------------
+                      00486         end
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE 11
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-ADC_READ_BIT                      00000073
-BIT_READ_END                      00000062
-BIT_READ_LOOP                     00000060
+ADC_READ_BIT                      0000006F
+BIT_READ_END                      0000005E
+BIT_READ_LOOP                     0000005C
 BitIdx                            0000000F
 Byte0                             00000012
 Byte1                             00000011
 Byte2                             00000010
 C                                 00000000
 DC                                00000001
-DELAY                             00000086
-DELAY_100us                       000000D5
-DELAY_1S                          000000CD
+DELAY                             0000007C
+DELAY_100us                       000000CB
+DELAY_1S                          000000C3
 EEADR                             00000009
 EECON1                            00000088
 EECON2                            00000089
 EEDATA                            00000008
 EEIE                              00000006
 EEIF                              00000004
-EOC                               0000005C
+EOC                               00000058
 F                                 00000001
 FSR                               00000004
 Flags                             00000014
 GIE                               00000007
-IDLE_STATE                        0000005A
+IDLE_STATE                        00000056
 INDF                              00000000
-INF_LOOP                          000000DD
+INF_LOOP                          000000D3
 INIT                              00000005
 INTCON                            0000000B
 INTE                              00000004
 INTEDG                            00000006
 INTF                              00000001
 IRP                               00000007
-ISR_ADC_READY                     0000005D
+ISR_ADC_READY                     00000059
 MAIN                              00000017
-MOTOR_0_OFF                       000000A5
-MOTOR_0_ON                        0000009D
-MOTOR_MINUS30_OFF                 000000B5
-MOTOR_MINUS30_ON                  000000AD
-MOTOR_PLUS30_OFF                  000000C5
-MOTOR_PLUS30_ON                   000000BD
-MOTOR_PLUS90_OFF                  00000095
-MOTOR_PLUS90_ON                   0000008D
+MOTOR_0_OFF                       0000009B
+MOTOR_0_ON                        00000093
+MOTOR_MINUS30_OFF                 000000AB
+MOTOR_MINUS30_ON                  000000A3
+MOTOR_PLUS30_OFF                  000000BB
+MOTOR_PLUS30_ON                   000000B3
+MOTOR_PLUS90_OFF                  0000008B
+MOTOR_PLUS90_ON                   00000083
 NOT_PD                            00000003
 NOT_RBPU                          00000007
 NOT_TO                            00000004
@@ -604,10 +620,10 @@ PCL                               00000002
 PCLATH                            0000000A
 PORTA                             00000005
 PORTB                             00000006
-POST_PROC                         00000063
+POST_PROC                         0000005F
 PROCESS_DATA                      0000002B
 PS0                               00000000
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE 12
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE 12
 
 
 SYMBOL TABLE
@@ -664,9 +680,9 @@ WR                                00000001
 WREN                              00000002
 WRERR                             00000003
 Z                                 00000002
-_.org_1_00DD                      000000DD
+_.org_1_00D3                      000000D3
 _CONFIG                           00002007
-MPASM 5.77                      MAINCODE.ASM   9-9-2021  18:57:45         PAGE 13
+MPASM 5.77                      MAINCODE.ASM   9-22-2021  17:55:54         PAGE 13
 
 
 SYMBOL TABLE

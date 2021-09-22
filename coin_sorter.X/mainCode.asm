@@ -18,11 +18,11 @@
 
 ;-------------------------------------------------------------------------------
 ; Pin Designations
-; * RA0: Servo Motor 1
-; * RA1: Servo Motor 2
-; * RA2: Servo Motor 3
-; * RA3: Connected to DOUT (Data line Out) of HX711 module
-; * RB0: Connected to  SCK  (Serial Clock) of HX711 module
+; * RA0: Servo Motor 1 (COIN_GATE)
+; * RA1: Servo Motor 2 (ROTATE)
+; * RA2: Servo Motor 3 (TILT)
+; * RB0: Connected to DOUT (Data line Out) of HX711 module
+; * RA3: Connected to  SCK  (Serial Clock) of HX711 module
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ INIT:
 ; Set Interrupt Settings
         bsf         INTCON, INTE        ; Enable the RB0/INT interrupt
         
-        bsf         INTCON, GIE         ; Disable all un-masked (global)
+        bcf         INTCON, GIE         ; Disable all un-masked (global)
                                         ; interrupts (turn this on only
                                         ; when needed)
                                         
@@ -124,7 +124,7 @@ INIT:
 MAIN:
         call        READ_FROM_ADC       ; Read a raw value from ADC
         
-        bsf         PORTA, RA3          ; Turn off ADC
+        bsf         PORTA, RA3          ; ADC: Power down mode
         call        DELAY_100us         ;
         
         ; Display the read bits
@@ -148,7 +148,7 @@ MAIN:
         call        _DISP_BITS          ;
         call        DELAY_1S            ;
         
-        bcf         PORTA, RA3          ; Resume ADC
+        bcf         PORTA, RA3          ; ADC: Power up mode
         
 PROCESS_DATA:
         ; Process Byte2, Byte1, Byte0
@@ -199,7 +199,7 @@ _DISP_BITS:                                                                     
 READ_FROM_ADC:
         bsf         STATUS, RP0         ; Switch to Bank 1 (bit 5)
         
-        bsf         INTCON, GIE         ; Disable all un-masked (global)
+        bcf         INTCON, GIE         ; Disable all un-masked (global)
                                         ; interrupts (turn this on only
                                         ; when needed)
                                         
@@ -209,17 +209,14 @@ READ_FROM_ADC:
 SOC: ; Start of conversion
         movlw       d'25'               ; Reset the bit index to 25
         movwf       BitIdx              ; (to count 24 bits)
+
+; Reset the 24-bit number
+        clrf        Byte2               ; Clear Byte2 register
+        clrf        Byte1               ; Clear Byte2 register
+        clrf        Byte0               ; Clear Byte2 register
         
-        movlw       d'0'                ; Reset the 24-bit number
-        movwf       Byte2               ; Byte2
-        movlw       d'0'
-        movwf       Byte1               ; Byte1
-        movlw       d'0'
-        movwf       Byte0               ; Byte0
-        
-        bcf         STATUS, RP0         ; Switch to Bank 0 (bit 5)
-        
-        movlw       b'00000000'         ; SCK: 0 (Clear SCK line)               
+; Turn on the ADC
+        movlw       b'00000000'         ; SCK: 0 (Clear SCK line)
         movwf       PORTA               ; RA0, RA1                              
         
         movlw       b'00000001'         ; DOUT: 1 (Set this to 1.               
@@ -251,11 +248,11 @@ ISR_ADC_READY:
         bcf         INTCON, GIE         ; Disable GIE to make the RB0 pin
                                         ; temporarily an input
         bcf         STATUS, RP0         ; Bank 0 select (bit 5)
-                                        
+
 BIT_READ_LOOP:
         decfsz      BitIdx, f           ; Decrement the current bit index
         goto        ADC_READ_BIT        ; Get the latest bit from the ADC
-        
+
 BIT_READ_END:
         bsf         Flags, 0            ; Set EOC flag to mark the EOC
 
@@ -266,7 +263,7 @@ POST_PROC:
         movwf       PORTA               ; 
         nop
         
-        movf        Byte2, W            ;                                           ; Reason for XORing
+        movf        Byte2, W            ;                                           ; Reason for XORing?
         xorlw       b'10000000'         ; XOR Byte2 with 0x80 (10000000)
         movwf       Byte2               ; 
         
@@ -283,6 +280,7 @@ POST_PROC:
         nop                             ;
         
         return                          ; Return from ISR_ADC_READY
+                                        ; Goes back to IDLE_STATE (EOC)
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
@@ -290,27 +288,35 @@ POST_PROC:
 ADC_READ_BIT:
 
 ; Left-shift Byte2, Byte1 and Byte0 by one bit
+        rlf         Byte0, f            ; Left-shift Byte0
+        rlf         Byte1, f            ; Left-shift Byte1
         rlf         Byte2, f            ; Left-shift Byte2
         
-        bcf         Byte2, 0            ; Clear the LSB of Byte2
         
-        rlf         Byte1, f            ; Left-shift Byte1
-        
-        btfsc       STATUS, C           ; Get the carry bit of Byte1 after
-                                        ; Left-shifting
+    
+;        rlf         Byte2, f            ; Left-shift Byte2
+;        
+;        bcf         Byte2, 0            ; Clear the LSB of Byte2
+;        
+;        rlf         Byte1, f            ; Left-shift Byte1
+;        
+;        btfsc       STATUS, C           ; Get the carry bit of Byte1 after
+;                                        ; Left-shifting
+;                                        
+;        bsf         Byte2, 0            ; Set the LSB of Byte2 equal to the
+;                                        ; carry of Byte1
+;        
+;        rlf         Byte0, f            ; Left-shift Byte0
+;        
+;        bcf         Byte1, 0            ; Clear the LSB of Byte1
+;        
+;        btfsc       STATUS, C           ; Get the carry bit of Byte0 after
+;                                        ; Left-shifting
+;                                        
+;        bsf         Byte1, 0            ; Set the LSB of Byte1 equal to the
+;                                        ; carry of Byte0
                                         
-        bsf         Byte2, 0            ; Set the LSB of Byte2 equal to the
-                                        ; carry of Byte1
-        
-        rlf         Byte0, f            ; Left-shift Byte0
-        
-        bcf         Byte1, 0            ; Clear the LSB of Byte1
-        
-        btfsc       STATUS, C           ; Get the carry bit of Byte0 after
-                                        ; Left-shifting
                                         
-        bsf         Byte1, 0            ; Set the LSB of Byte1 equal to the
-                                        ; carry of Byte0
         
         bcf         Byte0, 0            ; Clear the LSB of Byte0
                                         
@@ -332,7 +338,7 @@ ADC_READ_BIT:
         
         goto        BIT_READ_LOOP
 ;-------------------------------------------------------------------------------
-        
+
 ;-------------------------------------------------------------------------------
 ; DELAY: Generic delay subroutine
 ; T = 18 + (count1-1)*3 + (count2-1)*770 + (count3-1)*197140 ns
