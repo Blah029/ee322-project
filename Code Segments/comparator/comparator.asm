@@ -26,8 +26,8 @@ init									; initialisation
 	movwf		refByte1				;
 	movlw		b'10010110'				; set last reference byte
 	movwf		refByte0				;
-	movlw		b'11001000'				; emulate first input byte
-	movwf		inByte2					;
+	movlw		b'10101000'				; emulate first input byte
+	movwf		inByte1					;
 	movlw		d'0'					; clear all flags
 	movwf		flags					;
     goto main
@@ -40,8 +40,8 @@ main									; main code
 checkTolerance
 	bsf			STATUS,		RP0			; access bank 0
 	bcf			flags,		0			; clear xorResult flag
-	movfw		inByte2					; copy first input byte to WREG
-	xorwf		refByte2,	0			; perform xor with first reference byte
+	movfw		inByte1					; copy first input byte to WREG
+	xorwf		refByte1,	0			; perform xor with first reference byte
 	andlw		b'11111000'				; keep first 5 bits
 	movwf		xorResult				;
 	incf		xorResult				; check if zero
