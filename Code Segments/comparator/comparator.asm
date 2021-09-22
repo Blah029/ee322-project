@@ -26,7 +26,7 @@ init									; initialisation
 	movwf		refByte1				;
 	movlw		b'10010110'				; set last reference byte
 	movwf		refByte0				;
-	movlw		b'11001000'				; emulate first input byte
+	movlw		b'10001000'				; emulate first input byte
 	movwf		inByte2					;
 	movlw		d'0'					; clear all flags
 	movwf		flags					;
@@ -34,6 +34,10 @@ init									; initialisation
     
 main									; main code
     ; insert code
+	call checkTolerance
+	goto		main
+	
+checkTolerance
 	bsf			STATUS,		RP0			; access bank 0
 	bcf			flags,		0			; clear xorResult flag
 	movfw		inByte2					; copy first input byte to WREG
@@ -44,7 +48,6 @@ main									; main code
 	incf		xorResult				; check if zero
 	decfsz		xorResult				;
 		bsf		flags,		0			; set xorReslut flag
-	
-	goto		main
+	return
     
 end
