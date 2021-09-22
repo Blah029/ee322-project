@@ -12,4 +12,4 @@ Check whether ACD input is reasonably close to reference value
   - 0x13 - flags
 - Subroutines
   - checkTolerance </br>
-    Checking if first 5 bits of most significant reference byte and ADC input byte are identical (overall values within ~5% of each other). Clears bit 0 of flags register if within reange; sets if out of range.
+    Check if first 5 bits of most significant reference byte and ADC input byte are identical (overall values within ~5% of each other). Clears bit 0 of flags register if within range; sets if out of range.
