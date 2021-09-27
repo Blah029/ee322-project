@@ -31,12 +31,6 @@
 ;-------------------------------------------------------------------------------
 ; Constant Literals
 
-; Bit mask for comparison: Determines the bits that is needed to be tested
-;                          at 24-bit value comparison
-CTypeMaskB0 equ         b'00000000'
-CTypeMaskB1 equ         b'11100000'
-CTypeMaskB2 equ         b'11111111'
-
 ; Reference Values for coin weights
 CType1Byte0 equ         b'00000000'     ; Rs. 1
 CType1Byte1 equ         b'10100000'
@@ -83,9 +77,8 @@ RefByte0    equ         0x15
 
 ; Flag register: Stores bits corresponding to specific purposes
 ; Bit 0: EOC                            (0: Not EOC, 1: EOC)
-; Bit 1: Byte0 comparison result        (0: Unequal, 1: Equal)
-; Bit 2: Byte1 comparison result        (0: Unequal, 1: Equal)
-; Bit 3: Byte2 comparison result        (0: Unequal, 1: Equal)
+; Bit 1: Byte1 comparison result        (0: Unequal, 1: Equal)
+; Bit 2: Byte2 comparison result        (0: Unequal, 1: Equal)
 Flags       equ         0x16
 
 ; Processing
@@ -148,7 +141,7 @@ INIT:
     clrf        Flags               ; User-defined flags
     clrf        TotalAmount         ; Reset total amount to zero
         
-; Initialize PORTA and PORTB to zeros                                                 ; See whether this will be needed later
+; Initialize PORTA and PORTB to zeros
     movlw       b'00000000'         ; All zeros
     movwf       PORTB
     movlw       b'00000'            ; All zeros
@@ -175,7 +168,7 @@ INIT:
 ; MAIN: Main routine (loop)
 MAIN:
 ; Read a raw value from ADC of HX711 module
-    call        READ_FROM_ADC                                                       ; TRY TO USE A WAIT LOOP (so that PIC doesn't use much power)
+    call        READ_FROM_ADC
 
 ; Turn off the ADC temporarily
     bsf         PORTA, RA3          ; ADC: Power down mode
