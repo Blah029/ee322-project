@@ -51,15 +51,6 @@ CType4Byte2 equ         b'01111010'
 
 ;-------------------------------------------------------------------------------
 ; GPRs: Defines variable names for memory addresses used in the program.
- 
-; Counter variables for DELAY subroutine
-VarX        equ         0x0c		; Used in decfsz
-VarY        equ         0x0d		; Used in decfsz
-VarZ        equ         0x0e		; Used in decfsz
-
-; A variable to store the bit index currently being read from the ADC
-; of the HX711 module
-BitIdx      equ         0x0f                
 
 ; Three 8-bit registers to store the incoming 24-bit number from
 ; the HX711 module           Bit setup: [xxxxxxxx, xxxxxxxx, xxxxxxxx]
@@ -75,6 +66,15 @@ RefByte2    equ         0x13
 RefByte1    equ         0x14
 RefByte0    equ         0x15
 
+; A variable to store the bit index currently being read from the ADC
+; of the HX711 module
+BitIdx      equ         0x0f                
+      
+; Counter variables for DELAY subroutine
+VarX        equ         0x0c		; Used in decfsz
+VarY        equ         0x0d		; Used in decfsz
+VarZ        equ         0x0e		; Used in decfsz
+    
 ; Flag register: Stores bits corresponding to specific purposes
 ; Bit 0: EOC                            (0: Not EOC, 1: EOC)
 ; Bit 1: Byte1 comparison result        (0: Unequal, 1: Equal)
