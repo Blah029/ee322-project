@@ -12,13 +12,13 @@
 
 ;-------------------------------------------------------------------------------
 ; PIC pin designations (for reference)
-; * RA0             : COIN_GATE (Servo Motor 1)
-; * RA1             : ROTATE (Servo Motor 2)
-; * RA2             : TILT (Servo Motor 3)
-; * RA3             : SCK (Serial Clock) of HX711 module
-; * RA4             : 
-; * RB0             : DOUT (Data line Out) of HX711 module
-; * RA4 and RB1-RB7 : Display
+; * RA0          : COIN_GATE (Servo Motor 1)
+; * RA1          : ROTATE (Servo Motor 2)
+; * RA2          : TILT (Servo Motor 3)
+; * RA3          : SCK (Serial Clock) of HX711 module
+; * RA4          : 
+; * RB0          : DOUT (Data line Out) of HX711 module
+; * RA4, RB1-RB7 : Display
 ;-------------------------------------------------------------------------------
 
 ;<editor-fold defaultstate="collapsed" desc="DECLARATIONS">
@@ -127,7 +127,7 @@ INIT:
                                     ; RB0/INT pin (required by HX711)
                                     ; Falling edge = ADC is ready to
                                     ;                transmit data
-                                        
+
 ; Set PORTA, PORTB pin modes (default)
     movlw       b'00000001'         ; PORTB I/O pattern
     movwf       TRISB               ; Set PORTB pin modes
@@ -138,7 +138,7 @@ INIT:
     bcf         STATUS, RP0         ; Bank 0 select
 
 ; Reset flags (clear all)
-    clrf        Flags               ; User-defined flags
+    clrf        Flags               ; Clear user-defined flags
     clrf        TotalAmount         ; Reset total amount to zero
         
 ; Initialize PORTA and PORTB to zeros
@@ -195,8 +195,6 @@ END_MAIN:
     call        MOTOR_0_OFF         ;
     
     call        DELAY_500ms         ; Keep a delay
-
-
     
 ; Turn on the ADC again for the next cycle
     bcf         PORTA, RA3          ; ADC: Power up mode
@@ -314,7 +312,8 @@ ADC_READ_BIT:
     bsf         Byte0, 0            ; Set the LSB of the 24-bit number
                                     ; with the new bit (if it is 1)
         
-    goto        BIT_READ_LOOP_START
+    goto        BIT_READ_LOOP_START ; Go back to the beginning of a new bit
+                                    ; read cycle
 ;-------------------------------------------------------------------------------
 ;</editor-fold>
 
@@ -440,7 +439,7 @@ CHECK_TOLERANCE:
                                     ; reference
         
     ; Check equality
-    movf        Flags, W            ; Get the Flags register to W                   ; FIND A BETTER WAY IF POSSIBLE
+    movf        Flags, W            ; Get the Flags register to W
     sublw       b'00000110'         ; Check whether all the 2 flags
                                     ; (corresponding to Byte1, and Byte2)
                                     ; are 1. If yes, the weight of
@@ -485,10 +484,10 @@ UPDATE_DISPLAY:
     call        BIN_TO_BCD          ; Convert the 8-bit binary number to BCD
                                     ; (without altering the actual sum)
     
-    movf        BCDAmount, W        ;
-    movwf       DisplayReg          ;
+    movf        BCDAmount, W        ; Send the BCDAmount to the display
+    movwf       DisplayReg          ; register.
     call        DISPLAY_BITS        ;
-    call        DELAY_500ms         ;
+    call        DELAY_500ms         ; Keep a delay
 
 ;-------------------------------------------------------------------------------
 
@@ -687,8 +686,8 @@ DELAY_100us: ; For ADC power off
 ; DISPLAY_BITS: Sends the contents in the register DisplayReg to the display
 ;               unit.
 
-DISPLAY_BITS:                                                                       ; temporary function to display a register
-    bcf         PORTA, RA4                                                          ; DELETE LATER
+DISPLAY_BITS:
+    bcf         PORTA, RA4
     btfsc       DisplayReg, 0
     bsf         PORTA, RA4
         
@@ -735,7 +734,7 @@ DISPLAY_BITS:                                                                   
 
 ;-------------------------------------------------------------------------------
 ; DELAY: Generic delay subroutine
-; T = 18 + (VarX-1)*3 + (VarY-1)*770 + (VarZ-1)*197140 ns                           ; UPDATE
+; T = 18 + (VarX-1)*3 + (VarY-1)*770 + (VarZ-1)*197140 ns
 DELAY:
     decfsz      VarX, f
     goto        DELAY
@@ -751,44 +750,46 @@ DELAY:
 
 ;-------------------------------------------------------------------------------
 ; BIN_TO_BCD: 8-bit binary to BCD conversion. Used for the display.
-;             For an 8-bit number <= 99.
+;             Uses Double-Dabble algorithm (for an 8-bit number <= 99).
 
 BIN_TO_BCD:
-    movlw       d'8'                ; Initialize a counter variable at 8
-    movwf       VarX                ;
+    movlw       d'8'                ; Initialize counter variable VarX at 8
+    movwf       VarX                ; 
     
-    movf        TotalAmount, W
-    movwf       VarY
+    movf        TotalAmount, W      ; Copy TotalAmount to VarY
+    movwf       VarY                ;
     
-    clrf        BCDAmount
+    clrf        BCDAmount           ; Clear the BCDAmount register
     
 BB_LOOP_CHECK:
-; Shift left
-    rlf         VarY, f
-    rlf         BCDAmount, f
+    rlf         VarY, f             ; Left-shift VarY
+    rlf         BCDAmount, f        ; Left-shift BCDAmount
     
     decfsz      VarX, f             ; Decrement the loop index counter
-    goto        BB_LOOP_START
-    goto        BB_LOOP_END
+    goto        BB_LOOP_START       ; If VarX > 0, step into loop
+    goto        BB_LOOP_END         ; If VarX = 0, step out of loop
 
 BB_LOOP_START:
 ; Check the four LSBs
-    movlw       b'00001111'
-    andwf       BCDAmount, W
+    movlw       b'00001111'         ; Filter our the 4 LSBs of BCDAmount
+    andwf       BCDAmount, W        ; and place it in W
     
     sublw       d'4'                ; Check if the last 4 bits of current
                                     ; BCDAmount is >= 5.
-    movf        BCDAmount, W
-    btfss       STATUS, C           ; If yes, add 3 to BCDAmount
+    movf        BCDAmount, W        ; Restore the original value of BCDAmount
+                                    ; to W
+    btfss       STATUS, C           ; If yes, add 3 to BCDAmount (in W)
     addlw       d'3'                ;
     
-    movwf       BCDAmount
+    movwf       BCDAmount           ; Move BCDAmount in W to BCDAmount
     
-    goto        BB_LOOP_CHECK
+    goto        BB_LOOP_CHECK       ; Go to the beginning of the loop
+                                    ; and check if further iterations are
+                                    ; necessary.
     
 BB_LOOP_END:
     
-    return
+    return                          ; Return back to the caller function
 ;-------------------------------------------------------------------------------
 
 ;</editor-fold>

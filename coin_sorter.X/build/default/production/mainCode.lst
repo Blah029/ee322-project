@@ -1,4 +1,4 @@
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  1
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -18,13 +18,13 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00012 
                       00013 ;-------------------------------------------------------------------------------
                       00014 ; PIC pin designations (for reference)
-                      00015 ; * RA0             : COIN_GATE (Servo Motor 1)
-                      00016 ; * RA1             : ROTATE (Servo Motor 2)
-                      00017 ; * RA2             : TILT (Servo Motor 3)
-                      00018 ; * RA3             : SCK (Serial Clock) of HX711 module
-                      00019 ; * RA4             : 
-                      00020 ; * RB0             : DOUT (Data line Out) of HX711 module
-                      00021 ; * RA4 and RB1-RB7 : Display
+                      00015 ; * RA0          : COIN_GATE (Servo Motor 1)
+                      00016 ; * RA1          : ROTATE (Servo Motor 2)
+                      00017 ; * RA2          : TILT (Servo Motor 3)
+                      00018 ; * RA3          : SCK (Serial Clock) of HX711 module
+                      00019 ; * RA4          : 
+                      00020 ; * RB0          : DOUT (Data line Out) of HX711 module
+                      00021 ; * RA4, RB1-RB7 : Display
                       00022 ;-------------------------------------------------------------------------------
                       00023 
                       00024 ;<editor-fold defaultstate="collapsed" desc="DECLARATIONS">
@@ -47,880 +47,870 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00031 ;-------------------------------------------------------------------------------
                       00032 ; Constant Literals
                       00033 
-                      00034 ; Bit mask for comparison: Determines the bits that is needed to be tested
-                      00035 ;                          at 24-bit value comparison
-  00000000            00036 CTypeMaskB0 equ         b'00000000'
-  000000E0            00037 CTypeMaskB1 equ         b'11100000'
-  000000FF            00038 CTypeMaskB2 equ         b'11111111'
-                      00039 
-                      00040 ; Reference Values for coin weights
-  00000000            00041 CType1Byte0 equ         b'00000000'     ; Rs. 1
-  000000A0            00042 CType1Byte1 equ         b'10100000'
-  0000007D            00043 CType1Byte2 equ         b'01111101'
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  2
+                      00034 ; Reference Values for coin weights
+  00000000            00035 CType1Byte0 equ         b'00000000'     ; Rs. 1
+  000000A0            00036 CType1Byte1 equ         b'10100000'
+  0000007D            00037 CType1Byte2 equ         b'01111101'
+                      00038 
+  00000000            00039 CType2Byte0 equ         b'00000000'     ; Rs. 2
+  00000080            00040 CType2Byte1 equ         b'10000000'
+  0000007B            00041 CType2Byte2 equ         b'01111011'
+                      00042 
+  00000000            00043 CType3Byte0 equ         b'00000000'     ; Rs. 5
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00044 
-  00000000            00045 CType2Byte0 equ         b'00000000'     ; Rs. 2
-  00000080            00046 CType2Byte1 equ         b'10000000'
-  0000007B            00047 CType2Byte2 equ         b'01111011'
-                      00048 
-  00000000            00049 CType3Byte0 equ         b'00000000'     ; Rs. 5
-  00000020            00050 CType3Byte1 equ         b'00100000'
-  0000007B            00051 CType3Byte2 equ         b'01111011'
-                      00052 
-  00000000            00053 CType4Byte0 equ         b'00000000'     ; Rs. 10
-  000000A0            00054 CType4Byte1 equ         b'10100000'
-  0000007A            00055 CType4Byte2 equ         b'01111010'
-                      00056 ;-------------------------------------------------------------------------------
-                      00057 
-                      00058 ;-------------------------------------------------------------------------------
-                      00059 ; GPRs: Defines variable names for memory addresses used in the program.
-                      00060  
-                      00061 ; Counter variables for DELAY subroutine
-  0000000C            00062 VarX        equ         0x0c            ; Used in decfsz
-  0000000D            00063 VarY        equ         0x0d            ; Used in decfsz
-  0000000E            00064 VarZ        equ         0x0e            ; Used in decfsz
-                      00065 
-                      00066 ; A variable to store the bit index currently being read from the ADC
-                      00067 ; of the HX711 module
-  0000000F            00068 BitIdx      equ         0x0f                
-                      00069 
-                      00070 ; Three 8-bit registers to store the incoming 24-bit number from
-                      00071 ; the HX711 module           Bit setup: [xxxxxxxx, xxxxxxxx, xxxxxxxx]
-                      00072 ;                                       [  Byte2 ,   Byte1 ,   Byte0 ]
-  00000010            00073 Byte2       equ         0x10
-  00000011            00074 Byte1       equ         0x11
-  00000012            00075 Byte0       equ         0x12
-                      00076 
-                      00077 ; Three 8-bit registers to store a reference 24-bit number corresponding
-                      00078 ; to a coin type.            Bit setup: [xxxxxxxx, xxxxxxxx, xxxxxxxx]
-                      00079 ;                                       [RefByte2, RefByte1, RefByte0]
-  00000013            00080 RefByte2    equ         0x13
-  00000014            00081 RefByte1    equ         0x14
-  00000015            00082 RefByte0    equ         0x15
+  00000020            00044 CType3Byte1 equ         b'00100000'
+  0000007B            00045 CType3Byte2 equ         b'01111011'
+                      00046 
+  00000000            00047 CType4Byte0 equ         b'00000000'     ; Rs. 10
+  000000A0            00048 CType4Byte1 equ         b'10100000'
+  0000007A            00049 CType4Byte2 equ         b'01111010'
+                      00050 ;-------------------------------------------------------------------------------
+                      00051 
+                      00052 ;-------------------------------------------------------------------------------
+                      00053 ; GPRs: Defines variable names for memory addresses used in the program.
+                      00054 
+                      00055 ; Three 8-bit registers to store the incoming 24-bit number from
+                      00056 ; the HX711 module           Bit setup: [xxxxxxxx, xxxxxxxx, xxxxxxxx]
+                      00057 ;                                       [  Byte2 ,   Byte1 ,   Byte0 ]
+  00000010            00058 Byte2       equ         0x10
+  00000011            00059 Byte1       equ         0x11
+  00000012            00060 Byte0       equ         0x12
+                      00061 
+                      00062 ; Three 8-bit registers to store a reference 24-bit number corresponding
+                      00063 ; to a coin type.            Bit setup: [xxxxxxxx, xxxxxxxx, xxxxxxxx]
+                      00064 ;                                       [RefByte2, RefByte1, RefByte0]
+  00000013            00065 RefByte2    equ         0x13
+  00000014            00066 RefByte1    equ         0x14
+  00000015            00067 RefByte0    equ         0x15
+                      00068 
+                      00069 ; A variable to store the bit index currently being read from the ADC
+                      00070 ; of the HX711 module
+  0000000F            00071 BitIdx      equ         0x0f                
+                      00072       
+                      00073 ; Flag register: Stores bits corresponding to specific purposes
+                      00074 ; Bit 0: EOC                            (0: Not EOC, 1: EOC)
+                      00075 ; Bit 1: Byte1 comparison result        (0: Unequal, 1: Equal)
+                      00076 ; Bit 2: Byte2 comparison result        (0: Unequal, 1: Equal)
+  00000016            00077 Flags       equ         0x16
+                      00078       
+                      00079 ; Counter variables for DELAY subroutine
+  0000000C            00080 VarX        equ         0x0c            ; Used in decfsz
+  0000000D            00081 VarY        equ         0x0d            ; Used in decfsz
+  0000000E            00082 VarZ        equ         0x0e            ; Used in decfsz
                       00083 
-                      00084 ; Flag register: Stores bits corresponding to specific purposes
-                      00085 ; Bit 0: EOC                            (0: Not EOC, 1: EOC)
-                      00086 ; Bit 1: Byte0 comparison result        (0: Unequal, 1: Equal)
-                      00087 ; Bit 2: Byte1 comparison result        (0: Unequal, 1: Equal)
-                      00088 ; Bit 3: Byte2 comparison result        (0: Unequal, 1: Equal)
-  00000016            00089 Flags       equ         0x16
-                      00090 
-                      00091 ; Processing
-  00000018            00092 CoinType    equ         0x18            ; Store the current coin type
-  00000017            00093 TotalAmount equ         0x17            ; Store the running sum of coin values
-  00000019            00094 BCDAmount   equ         0x19            ; Stores the BCD digits corresponding
-                      00095                                         ; to the runninng sum of coin values
-                      00096 
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  3
+                      00084 ; Processing
+  00000018            00085 CoinType    equ         0x18            ; Store the current coin type
+  00000017            00086 TotalAmount equ         0x17            ; Store the running sum of coin values
+  00000019            00087 BCDAmount   equ         0x19            ; Stores the BCD digits corresponding
+                      00088                                         ; to the runninng sum of coin values
+                      00089 
+                      00090 ; Display
+  0000001A            00091 DisplayReg  equ         0x1a            ; Register used for the display
+                      00092 
+                      00093 ;-------------------------------------------------------------------------------
+                      00094 ;</editor-fold>
+                      00095 
+                      00096 ;<editor-fold defaultstate="collapsed" desc="INITIALIZATION">
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00097 ; Display
-  0000001A            00098 DisplayReg  equ         0x1a            ; Register used for the display
-                      00099 
+                      00097 
+                      00098 ;-------------------------------------------------------------------------------
+                      00099 ; # PROGRAM START #
                       00100 ;-------------------------------------------------------------------------------
-                      00101 ;</editor-fold>
-                      00102 
-                      00103 ;<editor-fold defaultstate="collapsed" desc="INITIALIZATION">
-                      00104 
-                      00105 ;-------------------------------------------------------------------------------
-                      00106 ; # PROGRAM START #
-                      00107 ;-------------------------------------------------------------------------------
-                      00108 
+                      00101 
+                      00102 ;-------------------------------------------------------------------------------
+                      00103 ; Define origin and interrupt vectors
+                      00104     org         0x000               ; Origin vector
+0000   2???           00105     goto        INIT
+                      00106         
+                      00107     org         0x04                ; Interrupt vector
+0004   2???           00108     goto        ISR_ADC_READY       ; Go to ISR_ADC_READY
                       00109 ;-------------------------------------------------------------------------------
-                      00110 ; Define origin and interrupt vectors
-                      00111     org         0x000               ; Origin vector
-0000   2???           00112     goto        INIT
-                      00113         
-                      00114     org         0x04                ; Interrupt vector
-0004   2???           00115     goto        ISR_ADC_READY       ; Go to ISR_ADC_READY
-                      00116 ;-------------------------------------------------------------------------------
-                      00117 
-                      00118 ;-------------------------------------------------------------------------------
-                      00119 ; INIT: Initialization routine
-                      00120 ;       Executed once. Configures general settings in PIC.
-0005                  00121 INIT:
-0005   1683           00122     bsf         STATUS, RP0         ; Bank 1 select (bit 5)
-                      00123         
-                      00124 ; Set Interrupt Settings
-0006   160B           00125     bsf         INTCON, INTE        ; Enable the RB0/INT interrupt
-                      00126         
-0007   138B           00127     bcf         INTCON, GIE         ; Disable all un-masked (global)
-                      00128                                     ; interrupts and turn this on only
-                      00129                                     ; when needed
-                      00130                                         
-0008   108B           00131     bcf         INTCON, INTF        ; Clear the RB0/INT flag
-                      00132         
+                      00110 
+                      00111 ;-------------------------------------------------------------------------------
+                      00112 ; INIT: Initialization routine
+                      00113 ;       Executed once. Configures general settings in PIC.
+0005                  00114 INIT:
+0005   1683           00115     bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+                      00116         
+                      00117 ; Set Interrupt Settings
+0006   160B           00118     bsf         INTCON, INTE        ; Enable the RB0/INT interrupt
+                      00119         
+0007   138B           00120     bcf         INTCON, GIE         ; Disable all un-masked (global)
+                      00121                                     ; interrupts and turn this on only
+                      00122                                     ; when needed
+                      00123                                         
+0008   108B           00124     bcf         INTCON, INTF        ; Clear the RB0/INT flag
+                      00125         
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0009   1301           00133     bcf         OPTION_REG, INTEDG  ; Interrupt on falling edge of
-                      00134                                     ; RB0/INT pin (required by HX711)
-                      00135                                     ; Falling edge = ADC is ready to
-                      00136                                     ;                transmit data
-                      00137                                         
-                      00138 ; Set PORTA, PORTB pin modes (default)
-000A   3001           00139     movlw       b'00000001'         ; PORTB I/O pattern
+0009   1301           00126     bcf         OPTION_REG, INTEDG  ; Interrupt on falling edge of
+                      00127                                     ; RB0/INT pin (required by HX711)
+                      00128                                     ; Falling edge = ADC is ready to
+                      00129                                     ;                transmit data
+                      00130 
+                      00131 ; Set PORTA, PORTB pin modes (default)
+000A   3001           00132     movlw       b'00000001'         ; PORTB I/O pattern
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-000B   0086           00140     movwf       TRISB               ; Set PORTB pin modes
-                      00141         
-000C   3000           00142     movlw       b'00000'            ; PORTA I/O pattern
+000B   0086           00133     movwf       TRISB               ; Set PORTB pin modes
+                      00134         
+000C   3000           00135     movlw       b'00000'            ; PORTA I/O pattern
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-000D   0085           00143     movwf       TRISA               ; Set PORTA pin modes
-                      00144         
-000E   1283           00145     bcf         STATUS, RP0         ; Bank 0 select
-                      00146 
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  4
+000D   0085           00136     movwf       TRISA               ; Set PORTA pin modes
+                      00137         
+000E   1283           00138     bcf         STATUS, RP0         ; Bank 0 select
+                      00139 
+                      00140 ; Reset flags (clear all)
+000F   0196           00141     clrf        Flags               ; Clear user-defined flags
+0010   0197           00142     clrf        TotalAmount         ; Reset total amount to zero
+                      00143         
+                      00144 ; Initialize PORTA and PORTB to zeros
+0011   3000           00145     movlw       b'00000000'         ; All zeros
+0012   0086           00146     movwf       PORTB
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  4
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00147 ; Reset flags (clear all)
-000F   0196           00148     clrf        Flags               ; User-defined flags
-0010   0197           00149     clrf        TotalAmount         ; Reset total amount to zero
-                      00150         
-                      00151 ; Initialize PORTA and PORTB to zeros                                                 ; See whether this
-                             will be needed later
-0011   3000           00152     movlw       b'00000000'         ; All zeros
-0012   0086           00153     movwf       PORTB
-0013   3000           00154     movlw       b'00000'            ; All zeros
-0014   0085           00155     movwf       PORTA
-                      00156         
-                      00157 ; Initialize positions of the three motors to zero
-0015   3007           00158     movlw       b'00111'            ; Turn on RA0, RA1, RA2
-0016   0085           00159     movwf       PORTA               ; 
-0017   2???           00160     call        MOTOR_0_ON          ;
+0013   3000           00147     movlw       b'00000'            ; All zeros
+0014   0085           00148     movwf       PORTA
+                      00149         
+                      00150 ; Initialize positions of the three motors to zero
+0015   3007           00151     movlw       b'00111'            ; Turn on RA0, RA1, RA2
+0016   0085           00152     movwf       PORTA               ; 
+0017   2???           00153     call        MOTOR_0_ON          ;
+                      00154         
+0018   3000           00155     movlw       b'00000'            ; Turn off RA0, RA1, RA2
+0019   0085           00156     movwf       PORTA               ; 
+001A   2???           00157     call        MOTOR_0_OFF         ;
+                      00158 
+                      00159 ; Finally switch to the MAIN routine
+001B   2???           00160     call        MAIN
                       00161         
-0018   3000           00162     movlw       b'00000'            ; Turn off RA0, RA1, RA2
-0019   0085           00163     movwf       PORTA               ; 
-001A   2???           00164     call        MOTOR_0_OFF         ;
-                      00165 
-                      00166 ; Finally switch to the MAIN routine
-001B   2???           00167     call        MAIN
-                      00168         
-                      00169 ;-------------------------------------------------------------------------------
-                      00170 ;</editor-fold>
-                      00171 
-                      00172 ;<editor-fold defaultstate="collapsed" desc="MAIN ROUTINE">
-                      00173     
-                      00174 ;-------------------------------------------------------------------------------
-                      00175 ; MAIN: Main routine (loop)
-001C                  00176 MAIN:
-                      00177 ; Read a raw value from ADC of HX711 module
-001C   2???           00178     call        READ_FROM_ADC                                                       ; TRY TO USE A WAIT 
-                            LOOP (so that PIC doesn't use much power)
+                      00162 ;-------------------------------------------------------------------------------
+                      00163 ;</editor-fold>
+                      00164 
+                      00165 ;<editor-fold defaultstate="collapsed" desc="MAIN ROUTINE">
+                      00166     
+                      00167 ;-------------------------------------------------------------------------------
+                      00168 ; MAIN: Main routine (loop)
+001C                  00169 MAIN:
+                      00170 ; Read a raw value from ADC of HX711 module
+001C   2???           00171     call        READ_FROM_ADC
+                      00172 
+                      00173 ; Power down the ADC temporarily
+001D   1585           00174     bsf         PORTA, RA3          ; ADC: Power down mode
+001E   2???           00175     call        DELAY_100us         ;
+                      00176         
+                      00177 ; Processing
+001F   2???           00178     goto        COMPARE_WEIGHT      ; Processing
                       00179 
-                      00180 ; Turn off the ADC temporarily
-001D   1585           00181     bsf         PORTA, RA3          ; ADC: Power down mode
-001E   2???           00182     call        DELAY_100us         ;
-                      00183         
-                      00184 ; Processing
-001F   2???           00185     goto        COMPARE_WEIGHT      ; Processing
-                      00186 
-                      00187 ; Latter part of the MAIN routine
-0020                  00188 END_MAIN:
-                      00189 ; Reset the motor positions
-                      00190 ; Turn the TILT motor back to its original position
-0020   1505           00191     bsf         PORTA, 2            ; Turn TILT motor to 0 degrees
-0021   2???           00192     call        MOTOR_0_ON          ;
-0022   1105           00193     bcf         PORTA, 2            ;
-0023   2???           00194     call        MOTOR_0_OFF         ;
-                      00195     
-0024   2???           00196     call        DELAY_500ms         ; Keep a delay
-                      00197     
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  5
+                      00180 ; Latter part of the MAIN routine
+0020                  00181 END_MAIN:
+                      00182 ; Reset the motor positions
+                      00183 ; Turn the TILT motor back to its original position
+0020   1505           00184     bsf         PORTA, 2            ; Turn TILT motor to 0 degrees
+0021   2???           00185     call        MOTOR_0_ON          ;
+0022   1105           00186     bcf         PORTA, 2            ;
+0023   2???           00187     call        MOTOR_0_OFF         ;
+                      00188     
+0024   2???           00189     call        DELAY_500ms         ; Keep a delay
+                      00190     
+                      00191 ; Turn the TURN motor back to its original position
+0025   1485           00192     bsf         PORTA, 1            ; Turn TURN motor to 0 degrees
+0026   2???           00193     call        MOTOR_0_ON          ;
+0027   1085           00194     bcf         PORTA, 1            ;
+0028   2???           00195     call        MOTOR_0_OFF         ;
+                      00196     
+0029   2???           00197     call        DELAY_500ms         ; Keep a delay
+                      00198     
+                      00199 ; Turn on the ADC again for the next cycle
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  5
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00198 ; Turn the TURN motor back to its original position
-0025   1485           00199     bsf         PORTA, 1            ; Turn TURN motor to 0 degrees
-0026   2???           00200     call        MOTOR_0_ON          ;
-0027   1085           00201     bcf         PORTA, 1            ;
-0028   2???           00202     call        MOTOR_0_OFF         ;
-                      00203     
-0029   2???           00204     call        DELAY_500ms         ; Keep a delay
-                      00205 
-                      00206 
-                      00207     
-                      00208 ; Turn on the ADC again for the next cycle
-002A   1185           00209     bcf         PORTA, RA3          ; ADC: Power up mode
-                      00210                                     ; Turn on the ADC for the next loop
-                      00211 
-002B   2???           00212     goto        MAIN                ; Go to the MAIN routine again
-                      00213 ;-------------------------------------------------------------------------------
-                      00214     
-                      00215 ;</editor-fold>
-                      00216 
-                      00217 ;<editor-fold defaultstate="collapsed" desc="SUB ROUTINES">
-                      00218 
-                      00219 ;-------------------------------------------------------------------------------
-                      00220 ; INPUT: ADC
-                      00221 
-                      00222 ;<editor-fold defaultstate="collapsed" desc="INPUT">
-                      00223         
-                      00224 ;-------------------------------------------------------------------------------
-                      00225 ; READ_FROM_ADC: Read a 24-bit raw value from the HX711 module
-002C                  00226 READ_FROM_ADC:
-002C   1683           00227     bsf         STATUS, RP0         ; Switch to Bank 1 (bit 5)
-                      00228         
-002D   138B           00229     bcf         INTCON, GIE         ; Disable all un-masked (global)
-                      00230                                     ; interrupts (turn this on only
-                      00231                                     ; when needed)
-                      00232     
-002E   108B           00233     bcf         INTCON, INTF        ; Clear the RB0/INT flag
-002F   1283           00234     bcf         STATUS, RP0         ; Bank 0 select
-                      00235         
-0030                  00236 SOC: ; Start of conversion
-0030   3019           00237     movlw       d'25'               ; Reset the bit index to 25
-0031   008F           00238     movwf       BitIdx              ; (to count 24 bits)
-                      00239         
-                      00240 ; Turn on the ADC
-0032   1185           00241     bcf         PORTA, RA3          ; SCK: 0 (Clear SCK line)
-                      00242         
-0033   1406           00243     bsf         PORTB, 0            ; DOUT: 1 (Set this to 1. 
-                      00244                                     ; Interrupt will then trigger
-                      00245                                     ; at a falling edge of this pin)
-                      00246     
-0034   1016           00247     bcf         Flags, 0            ; Clear EOC flag
-                      00248     
-0035   1683           00249     bsf         STATUS, RP0         ; Bank 1 select (bit 5)
-0036   178B           00250     bsf         INTCON, GIE         ; Enable GIE to make the
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  6
+002A   1185           00200     bcf         PORTA, RA3          ; ADC: Power up mode
+                      00201                                     ; Turn on the ADC for the next loop
+                      00202 
+002B   2???           00203     goto        MAIN                ; Go to the MAIN routine again
+                      00204 ;-------------------------------------------------------------------------------
+                      00205     
+                      00206 ;</editor-fold>
+                      00207 
+                      00208 ;<editor-fold defaultstate="collapsed" desc="SUB ROUTINES">
+                      00209 
+                      00210 ;-------------------------------------------------------------------------------
+                      00211 ; INPUT: ADC
+                      00212 
+                      00213 ;<editor-fold defaultstate="collapsed" desc="INPUT">
+                      00214         
+                      00215 ;-------------------------------------------------------------------------------
+                      00216 ; READ_FROM_ADC: Read a 24-bit raw value from the HX711 module
+002C                  00217 READ_FROM_ADC:
+002C   1683           00218     bsf         STATUS, RP0         ; Switch to Bank 1 (bit 5)
+                      00219         
+002D   138B           00220     bcf         INTCON, GIE         ; Disable all un-masked (global)
+                      00221                                     ; interrupts (turn this on only
+                      00222                                     ; when needed)
+                      00223     
+002E   108B           00224     bcf         INTCON, INTF        ; Clear the RB0/INT flag
+002F   1283           00225     bcf         STATUS, RP0         ; Bank 0 select
+                      00226         
+0030                  00227 SOC: ; Start of conversion
+0030   3019           00228     movlw       d'25'               ; Reset the bit index to 25
+0031   008F           00229     movwf       BitIdx              ; (to count 24 bits)
+                      00230         
+                      00231 ; Turn on the ADC
+0032   1185           00232     bcf         PORTA, RA3          ; SCK: 0 (Clear SCK line)
+                      00233         
+0033   1406           00234     bsf         PORTB, 0            ; DOUT: 1 (Set this to 1. 
+                      00235                                     ; Interrupt will then trigger
+                      00236                                     ; at a falling edge of this pin)
+                      00237     
+0034   1016           00238     bcf         Flags, 0            ; Clear EOC flag
+                      00239     
+0035   1683           00240     bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+0036   178B           00241     bsf         INTCON, GIE         ; Enable GIE to make the
+                      00242                                     ; RB0 pin an interrupt pin
+0037   1283           00243     bcf         STATUS, RP0         ; Bank 0 select (bit 5)
+                      00244 
+                      00245 ; Wait until ADC is ready. That is, wait until a falling-edge occurs on RB0.
+                      00246 ; If it does, the PIC goes to the ISR.
+0038                  00247 IDLE_STATE:
+0038   1C16           00248     btfss       Flags, 0            ; Check if the EOC flag is set.
+0039   2???           00249     goto        IDLE_STATE          ; If not, stay until the ADC is ready.
+                      00250                                     ; (loop)
+                      00251 
+003A                  00252 EOC: ; End of conversion
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  6
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00251                                     ; RB0 pin an interrupt pin
-0037   1283           00252     bcf         STATUS, RP0         ; Bank 0 select (bit 5)
-                      00253 
-                      00254 ; Wait until ADC is ready. That is, wait until a falling-edge occurs on RB0.
-                      00255 ; If it does, the PIC goes to the ISR.
-0038                  00256 IDLE_STATE:
-0038   1C16           00257     btfss       Flags, 0            ; Check if the EOC flag is set.
-0039   2???           00258     goto        IDLE_STATE          ; If not, stay until the ADC is ready.
-                      00259                                     ; (loop)
-                      00260 
-003A                  00261 EOC: ; End of conversion
-003A   0008           00262     return                          ; If EOC flag is set, then a single
-                      00263                                     ; read cycle is completed. Go back
-                      00264                                     ; to the MAIN routine.
-                      00265 ;-------------------------------------------------------------------------------
+003A   0008           00253     return                          ; If EOC flag is set, then a single
+                      00254                                     ; read cycle is completed. Go back
+                      00255                                     ; to the MAIN routine.
+                      00256 ;-------------------------------------------------------------------------------
+                      00257 
+                      00258 ;-------------------------------------------------------------------------------
+                      00259 ; ISR_ADC_READY: Occurs when ADC is ready to send data. Triggered through RB0
+                      00260 ;                interrupt.
+003B                  00261 ISR_ADC_READY:
+003B   1683           00262     bsf         STATUS, RP0         ; Bank 1 select (bit 5)
+003C   138B           00263     bcf         INTCON, GIE         ; Disable GIE to make the RB0 pin
+                      00264                                     ; temporarily an input
+003D   1283           00265     bcf         STATUS, RP0         ; Bank 0 select (bit 5)
                       00266 
-                      00267 ;-------------------------------------------------------------------------------
-                      00268 ; ISR_ADC_READY: Occurs when ADC is ready to send data. Triggered through RB0
-                      00269 ;                interrupt.
-003B                  00270 ISR_ADC_READY:
-003B   1683           00271     bsf         STATUS, RP0         ; Bank 1 select (bit 5)
-003C   138B           00272     bcf         INTCON, GIE         ; Disable GIE to make the RB0 pin
-                      00273                                     ; temporarily an input
-003D   1283           00274     bcf         STATUS, RP0         ; Bank 0 select (bit 5)
-                      00275 
-003E                  00276 BIT_READ_LOOP_START:
-003E   0B8F           00277     decfsz      BitIdx, f           ; Decrement the current bit index
-003F   2???           00278     goto        ADC_READ_BIT        ; Get the latest bit from the ADC
-                      00279 
-0040                  00280 BIT_READ_LOOP_END:
-0040   1416           00281     bsf         Flags, 0            ; Set EOC flag to mark the EOC
-                      00282     
-0041   1585           00283     bsf         PORTA, RA3          ; Turn on the SCK pin of HX711
-0042   0000           00284     nop
-                      00285 
-                      00286 ; Post-processing of received data
-0043                  00287 POST_PROC:    
-                      00288 ; Raw output conditioning
-0043   0810           00289     movf        Byte2, W            ;
-0044   3A80           00290     xorlw       b'10000000'         ; XOR Byte2 with 0x80 (10000000)
-0045   0090           00291     movwf       Byte2               ; (Inverts the MSB of Byte2)
-                      00292         
-0046   1185           00293     bcf         PORTA, RA3          ; Turn off the SCK pin of HX711
-0047   0000           00294     nop                             ;
-                      00295         
-0048   0008           00296     return                          ; Return from ISR_ADC_READY
-                      00297                                     ; Goes back to IDLE_STATE (EOC)
-                      00298 ;-------------------------------------------------------------------------------
-                      00299 
-                      00300 ;-------------------------------------------------------------------------------
-                      00301 ; ADC_READ_BIT: Read a bit from the ADC
-0049                  00302 ADC_READ_BIT:
-                      00303 
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  7
+003E                  00267 BIT_READ_LOOP_START:
+003E   0B8F           00268     decfsz      BitIdx, f           ; Decrement the current bit index
+003F   2???           00269     goto        ADC_READ_BIT        ; Get the latest bit from the ADC
+                      00270 
+0040                  00271 BIT_READ_LOOP_END:
+0040   1416           00272     bsf         Flags, 0            ; Set EOC flag to mark the EOC
+                      00273     
+0041   1585           00274     bsf         PORTA, RA3          ; Turn on the SCK pin of HX711
+0042   0000           00275     nop
+                      00276 
+                      00277 ; Post-processing of received data
+0043                  00278 POST_PROC:    
+                      00279 ; Raw output conditioning
+0043   0810           00280     movf        Byte2, W            ;
+0044   3A80           00281     xorlw       b'10000000'         ; XOR Byte2 with 0x80 (10000000)
+0045   0090           00282     movwf       Byte2               ; (Inverts the MSB of Byte2)
+                      00283     
+0046   1185           00284     bcf         PORTA, RA3          ; Turn off the SCK pin of HX711
+0047   0000           00285     nop                             ;
+                      00286         
+0048   0008           00287     return                          ; Return from ISR_ADC_READY
+                      00288                                     ; Goes back to IDLE_STATE (EOC)
+                      00289 ;-------------------------------------------------------------------------------
+                      00290 
+                      00291 ;-------------------------------------------------------------------------------
+                      00292 ; ADC_READ_BIT: Read a bit from the ADC
+0049                  00293 ADC_READ_BIT:
+                      00294 
+                      00295 ; Left-shift Byte2, Byte1 and Byte0 by one bit. Carries between the registers
+                      00296 ; are automatically handled.
+0049   0D92           00297     rlf         Byte0, f            ; Left-shift Byte0
+004A   0D91           00298     rlf         Byte1, f            ; Left-shift Byte1
+004B   0D90           00299     rlf         Byte2, f            ; Left-shift Byte2
+004C   1012           00300     bcf         Byte0, 0            ; Clear the LSB of Byte0
+                      00301                                         
+                      00302 ; Get the incoming bit and assign it to the LSB of Byte0
+004D   1585           00303     bsf         PORTA, RA3          ; Turn on the SCK pin of HX711
+004E   0000           00304     nop
+                      00305         
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  7
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00304 ; Left-shift Byte2, Byte1 and Byte0 by one bit. Carries between the registers
-                      00305 ; are automatically handled.
-0049   0D92           00306     rlf         Byte0, f            ; Left-shift Byte0
-004A   0D91           00307     rlf         Byte1, f            ; Left-shift Byte1
-004B   0D90           00308     rlf         Byte2, f            ; Left-shift Byte2
-004C   1012           00309     bcf         Byte0, 0            ; Clear the LSB of Byte0
-                      00310                                         
-                      00311 ; Get the incoming bit and assign it to the LSB of Byte0
-004D   1585           00312     bsf         PORTA, RA3          ; Turn on the SCK pin of HX711
-004E   0000           00313     nop
+004F   1185           00306     bcf         PORTA, RA3          ; Turn off the SCK pin of HX711
+0050   0000           00307     nop
+                      00308         
+0051   1806           00309     btfsc       PORTB, RB0          ; Capture the incoming bit from the
+                      00310                                     ; ADC by checking whether it is 1
+                      00311         
+0052   1412           00312     bsf         Byte0, 0            ; Set the LSB of the 24-bit number
+                      00313                                     ; with the new bit (if it is 1)
                       00314         
-004F   1185           00315     bcf         PORTA, RA3          ; Turn off the SCK pin of HX711
-0050   0000           00316     nop
-                      00317         
-0051   1806           00318     btfsc       PORTB, RB0          ; Capture the incoming bit from the
-                      00319                                     ; ADC by checking whether it is 1
-                      00320         
-0052   1412           00321     bsf         Byte0, 0            ; Set the LSB of the 24-bit number
-                      00322                                     ; with the new bit (if it is 1)
-                      00323         
-0053   2???           00324     goto        BIT_READ_LOOP_START
-                      00325 ;-------------------------------------------------------------------------------
-                      00326 ;</editor-fold>
-                      00327 
-                      00328 ;-------------------------------------------------------------------------------
-                      00329 
-                      00330 ;-------------------------------------------------------------------------------
-                      00331 ; PROCESSING
+0053   2???           00315     goto        BIT_READ_LOOP_START ; Go back to the beginning of a new bit
+                      00316                                     ; read cycle
+                      00317 ;-------------------------------------------------------------------------------
+                      00318 ;</editor-fold>
+                      00319 
+                      00320 ;-------------------------------------------------------------------------------
+                      00321 
+                      00322 ;-------------------------------------------------------------------------------
+                      00323 ; PROCESSING
+                      00324 
+                      00325 ;<editor-fold defaultstate="collapsed" desc="PROCESSING">
+                      00326 
+                      00327 ;-------------------------------------------------------------------------------
+                      00328 ; COMPARE_WEIGHT: Compares the weight of the coin on the platform
+                      00329 ;                 (if any) with the reference coin weights and determines the
+                      00330 ;                 coin type
+0054                  00331 COMPARE_WEIGHT:
                       00332 
-                      00333 ;<editor-fold defaultstate="collapsed" desc="PROCESSING">
-                      00334 
-                      00335 ;-------------------------------------------------------------------------------
-                      00336 ; COMPARE_WEIGHT: Compares the weight of the coin on the platform
-                      00337 ;                 (if any) with the reference coin weights and determines the
-                      00338 ;                 coin type
-0054                  00339 COMPARE_WEIGHT:
-                      00340 
-0054                  00341 COIN_TYPE_1:
-0054   3000           00342     movlw       CType1Byte0         ; Load coin type 1 reference value
-0055   0095           00343     movwf       RefByte0            ;
-0056   30A0           00344     movlw       CType1Byte1         ;
-0057   0094           00345     movwf       RefByte1            ;
-0058   307D           00346     movlw       CType1Byte2         ;
-0059   0093           00347     movwf       RefByte2            ;
-                      00348         
-005A   2???           00349     call        CHECK_TOLERANCE     ; Compare the 24-bit value from the
-                      00350                                     ; ADC with the chosen reference value
-                      00351                                         
-005B   1D03           00352     btfss       STATUS, Z           ; Check if the last comparison
-                      00353                                     ; resulted 1
-005C   2???           00354     goto        COIN_TYPE_2         ; Check the next coin type in case of
-                      00355                                     ; unsuccessful comparison
-                      00356 ; Successful comparison
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  8
+0054                  00333 COIN_TYPE_1:
+0054   3000           00334     movlw       CType1Byte0         ; Load coin type 1 reference value
+0055   0095           00335     movwf       RefByte0            ;
+0056   30A0           00336     movlw       CType1Byte1         ;
+0057   0094           00337     movwf       RefByte1            ;
+0058   307D           00338     movlw       CType1Byte2         ;
+0059   0093           00339     movwf       RefByte2            ;
+                      00340         
+005A   2???           00341     call        CHECK_TOLERANCE     ; Compare the 24-bit value from the
+                      00342                                     ; ADC with the chosen reference value
+                      00343                                         
+005B   1D03           00344     btfss       STATUS, Z           ; Check if the last comparison
+                      00345                                     ; resulted 1
+005C   2???           00346     goto        COIN_TYPE_2         ; Check the next coin type in case of
+                      00347                                     ; unsuccessful comparison
+                      00348 ; Successful comparison
+005D   3001           00349     movlw       d'1'
+005E   0098           00350     movwf       CoinType
+005F   2???           00351     goto        COIN_GATE_OPEN      ; Accept the coin
+                      00352 
+0060                  00353 COIN_TYPE_2:
+0060   3000           00354     movlw       CType2Byte0         ; Load coin type 2 reference value
+0061   0095           00355     movwf       RefByte0            ;
+0062   3080           00356     movlw       CType2Byte1         ;
+0063   0094           00357     movwf       RefByte1            ;
+0064   307B           00358     movlw       CType2Byte2         ;
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  8
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-005D   3001           00357     movlw       d'1'
-005E   0098           00358     movwf       CoinType
-005F   2???           00359     goto        COIN_GATE_OPEN      ; Accept the coin
-                      00360 
-0060                  00361 COIN_TYPE_2:
-0060   3000           00362     movlw       CType2Byte0         ; Load coin type 2 reference value
-0061   0095           00363     movwf       RefByte0            ;
-0062   3080           00364     movlw       CType2Byte1         ;
-0063   0094           00365     movwf       RefByte1            ;
-0064   307B           00366     movlw       CType2Byte2         ;
-0065   0093           00367     movwf       RefByte2            ;
-                      00368         
-0066   2???           00369     call        CHECK_TOLERANCE     ; Compare the 24-bit value from the
-                      00370                                     ; ADC with the chosen reference value
-                      00371                                         
-0067   1D03           00372     btfss       STATUS, Z           ; Check if the last comparison
-                      00373                                     ; resulted 1
-0068   2???           00374     goto        COIN_TYPE_3         ; Check the next coin type in case of
-                      00375                                     ; unsuccessful comparison
-                      00376 ; Successful comparison
-0069   3002           00377     movlw       d'2'
-006A   0098           00378     movwf       CoinType
-006B   2???           00379     goto        COIN_GATE_OPEN      ; Accept the coin
+0065   0093           00359     movwf       RefByte2            ;
+                      00360         
+0066   2???           00361     call        CHECK_TOLERANCE     ; Compare the 24-bit value from the
+                      00362                                     ; ADC with the chosen reference value
+                      00363                                         
+0067   1D03           00364     btfss       STATUS, Z           ; Check if the last comparison
+                      00365                                     ; resulted 1
+0068   2???           00366     goto        COIN_TYPE_3         ; Check the next coin type in case of
+                      00367                                     ; unsuccessful comparison
+                      00368 ; Successful comparison
+0069   3002           00369     movlw       d'2'
+006A   0098           00370     movwf       CoinType
+006B   2???           00371     goto        COIN_GATE_OPEN      ; Accept the coin
+                      00372         
+006C                  00373 COIN_TYPE_3:
+006C   3000           00374     movlw       CType3Byte0         ; Load coin type 3 reference value
+006D   0095           00375     movwf       RefByte0            ;
+006E   3020           00376     movlw       CType3Byte1         ;
+006F   0094           00377     movwf       RefByte1            ;
+0070   307B           00378     movlw       CType3Byte2         ;
+0071   0093           00379     movwf       RefByte2            ;
                       00380         
-006C                  00381 COIN_TYPE_3:
-006C   3000           00382     movlw       CType3Byte0         ; Load coin type 3 reference value
-006D   0095           00383     movwf       RefByte0            ;
-006E   3020           00384     movlw       CType3Byte1         ;
-006F   0094           00385     movwf       RefByte1            ;
-0070   307B           00386     movlw       CType3Byte2         ;
-0071   0093           00387     movwf       RefByte2            ;
-                      00388         
-0072   2???           00389     call        CHECK_TOLERANCE     ; Compare the 24-bit value from the
-                      00390                                     ; ADC with the chosen reference value
-                      00391                                         
-0073   1D03           00392     btfss       STATUS, Z           ; Check if the last comparison
-                      00393                                     ; resulted 1
-0074   2???           00394     goto        COIN_TYPE_4         ; Check the next coin type in case of
-                      00395                                     ; unsuccessful comparison
-                      00396 ; Successful comparison
-0075   3005           00397     movlw       d'5'
-0076   0098           00398     movwf       CoinType
-0077   2???           00399     goto        COIN_GATE_OPEN      ; Accept the coin
-                      00400                                         
-0078                  00401 COIN_TYPE_4:
-0078   3000           00402     movlw       CType4Byte0         ; Load coin type 4 reference value
-0079   0095           00403     movwf       RefByte0            ;
-007A   30A0           00404     movlw       CType4Byte1         ;
-007B   0094           00405     movwf       RefByte1            ;
-007C   307A           00406     movlw       CType4Byte2         ;
-007D   0093           00407     movwf       RefByte2            ;
-                      00408         
-007E   2???           00409     call        CHECK_TOLERANCE     ; Compare the 24-bit value from the
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE  9
+0072   2???           00381     call        CHECK_TOLERANCE     ; Compare the 24-bit value from the
+                      00382                                     ; ADC with the chosen reference value
+                      00383                                         
+0073   1D03           00384     btfss       STATUS, Z           ; Check if the last comparison
+                      00385                                     ; resulted 1
+0074   2???           00386     goto        COIN_TYPE_4         ; Check the next coin type in case of
+                      00387                                     ; unsuccessful comparison
+                      00388 ; Successful comparison
+0075   3005           00389     movlw       d'5'
+0076   0098           00390     movwf       CoinType
+0077   2???           00391     goto        COIN_GATE_OPEN      ; Accept the coin
+                      00392                                         
+0078                  00393 COIN_TYPE_4:
+0078   3000           00394     movlw       CType4Byte0         ; Load coin type 4 reference value
+0079   0095           00395     movwf       RefByte0            ;
+007A   30A0           00396     movlw       CType4Byte1         ;
+007B   0094           00397     movwf       RefByte1            ;
+007C   307A           00398     movlw       CType4Byte2         ;
+007D   0093           00399     movwf       RefByte2            ;
+                      00400         
+007E   2???           00401     call        CHECK_TOLERANCE     ; Compare the 24-bit value from the
+                      00402                                     ; ADC with the chosen reference value
+                      00403         
+007F   1D03           00404     btfss       STATUS, Z           ; Check if the last comparison
+                      00405                                     ; resulted 1
+0080   2???           00406     goto        END_MAIN            ; In case of unsuccessful comparison,
+                      00407                                     ; end data processing
+                      00408 ; Successful comparison
+0081   300A           00409     movlw       d'10'
+0082   0098           00410     movwf       CoinType
+0083   2???           00411     goto        COIN_GATE_OPEN      ; Accept the coin
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  9
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00410                                     ; ADC with the chosen reference value
-                      00411         
-007F   1D03           00412     btfss       STATUS, Z           ; Check if the last comparison
-                      00413                                     ; resulted 1
-0080   2???           00414     goto        END_MAIN            ; In case of unsuccessful comparison,
-                      00415                                     ; end data processing
-                      00416 ; Successful comparison
-0081   300A           00417     movlw       d'10'
-0082   0098           00418     movwf       CoinType
-0083   2???           00419     goto        COIN_GATE_OPEN      ; Accept the coin
-                      00420         
-                      00421 ; ------------------------------------------------------------------------------
-                      00422 
-                      00423 ;-------------------------------------------------------------------------------
-                      00424 ; CHECK_TOLERANCE: Tests whether the 24-bit value read from the HX711 module
-                      00425 ;                  matches the given reference value by comparing a specified
-                      00426 ;                  number of most significant bits.
-0084                  00427 CHECK_TOLERANCE:
-0084   0196           00428     clrf        Flags               ; Clear flags register
-                      00429         
-                      00430     ; Byte2
-0085   0810           00431     movf        Byte2, W            ; Copy Byte2 to W
-0086   0213           00432     subwf       RefByte2, W         ; Subtract Byte2 from RefByte2
-0087   1903           00433     btfsc       STATUS, Z           ; Test whether the Z flag is set.
-                      00434                                     ; Z = 1 when Byte2 is equal to the
-                      00435                                     ; reference
-0088   1516           00436     bsf         Flags, 2            ; Set flag 2 if the Byte2 matches the
+                      00412         
+                      00413 ; ------------------------------------------------------------------------------
+                      00414 
+                      00415 ;-------------------------------------------------------------------------------
+                      00416 ; CHECK_TOLERANCE: Tests whether the 24-bit value read from the HX711 module
+                      00417 ;                  matches the given reference value by comparing a specified
+                      00418 ;                  number of most significant bits.
+0084                  00419 CHECK_TOLERANCE:
+0084   0196           00420     clrf        Flags               ; Clear flags register
+                      00421         
+                      00422     ; Byte2
+0085   0810           00423     movf        Byte2, W            ; Copy Byte2 to W
+0086   0213           00424     subwf       RefByte2, W         ; Subtract Byte2 from RefByte2
+0087   1903           00425     btfsc       STATUS, Z           ; Test whether the Z flag is set.
+                      00426                                     ; Z = 1 when Byte2 is equal to the
+                      00427                                     ; reference
+0088   1516           00428     bsf         Flags, 2            ; Set flag 2 if the Byte2 matches the
+                      00429                                     ; reference
+                      00430                                         
+                      00431     ; Byte1
+0089   0811           00432     movf        Byte1, W            ; Copy Byte1 to W
+008A   39E0           00433     andlw       b'11100000'         ; Filter out Byte1
+008B   0214           00434     subwf       RefByte1, W         ; Subtract Byte1 from RefByte1
+008C   1903           00435     btfsc       STATUS, Z           ; Test whether the Z flag is set.
+                      00436                                     ; Z = 1 when Byte1 is equal to the
                       00437                                     ; reference
-                      00438                                         
-                      00439     ; Byte1
-0089   0811           00440     movf        Byte1, W            ; Copy Byte1 to W
-008A   39E0           00441     andlw       b'11100000'         ; Filter out Byte1
-008B   0214           00442     subwf       RefByte1, W         ; Subtract Byte1 from RefByte1
-008C   1903           00443     btfsc       STATUS, Z           ; Test whether the Z flag is set.
-                      00444                                     ; Z = 1 when Byte1 is equal to the
-                      00445                                     ; reference
-008D   1496           00446     bsf         Flags, 1            ; Set flag 1 if the Byte1 matches the
-                      00447                                     ; reference
-                      00448         
-                      00449     ; Check equality
-008E   0816           00450     movf        Flags, W            ; Get the Flags register to W                   ; FIND A BETTER WAY 
-                            IF POSSIBLE
-008F   3C06           00451     sublw       b'00000110'         ; Check whether all the 2 flags
-                      00452                                     ; (corresponding to Byte1, and Byte2)
-                      00453                                     ; are 1. If yes, the weight of
-                      00454                                     ; the coin is within a valid range.
-                      00455     
-0090   0008           00456     return                          ; Return
-                      00457 
-                      00458 ;-------------------------------------------------------------------------------
-                      00459 
-                      00460 ;</editor-fold>
-                      00461 
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 10
+008D   1496           00438     bsf         Flags, 1            ; Set flag 1 if the Byte1 matches the
+                      00439                                     ; reference
+                      00440         
+                      00441     ; Check equality
+008E   0816           00442     movf        Flags, W            ; Get the Flags register to W
+008F   3C06           00443     sublw       b'00000110'         ; Check whether all the 2 flags
+                      00444                                     ; (corresponding to Byte1, and Byte2)
+                      00445                                     ; are 1. If yes, the weight of
+                      00446                                     ; the coin is within a valid range.
+                      00447     
+0090   0008           00448     return                          ; Return
+                      00449 
+                      00450 ;-------------------------------------------------------------------------------
+                      00451 
+                      00452 ;</editor-fold>
+                      00453 
+                      00454 ;-------------------------------------------------------------------------------
+                      00455 
+                      00456 ;-------------------------------------------------------------------------------
+                      00457 ; ACTUATION: Motors, motor delays etc.
+                      00458 
+                      00459 ;<editor-fold defaultstate="collapsed" desc="ACTUATION">
+                      00460 
+                      00461 ;-------------------------------------------------------------------------------
+                      00462 ; COIN_GATE_OPEN: Takes the coin in if the coin weight matches the reference
+                      00463 ;                 values.
+0091                  00464 COIN_GATE_OPEN:
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 10
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00462 ;-------------------------------------------------------------------------------
-                      00463 
-                      00464 ;-------------------------------------------------------------------------------
-                      00465 ; ACTUATION: Motors, motor delays etc.
-                      00466 
-                      00467 ;<editor-fold defaultstate="collapsed" desc="ACTUATION">
-                      00468 
-                      00469 ;-------------------------------------------------------------------------------
-                      00470 ; COIN_GATE_OPEN: Takes the coin in if the coin weight matches the reference
-                      00471 ;                 values.
-0091                  00472 COIN_GATE_OPEN:
-0091   1405           00473     bsf         PORTA, 0            ; Open COIN_GATE
-0092   2???           00474     call        MOTOR_PLUS90_ON     ;
-0093   1005           00475     bcf         PORTA, 0            ;
-0094   2???           00476     call        MOTOR_PLUS90_OFF    ;
-                      00477     
-0095   2???           00478     call        DELAY_500ms         ; Keep a delay
-                      00479     
-0096   1405           00480     bsf         PORTA, 0            ; Close COIN_GATE
-0097   2???           00481     call        MOTOR_0_ON          ;
-0098   1005           00482     bcf         PORTA, 0            ;
-0099   2???           00483     call        MOTOR_0_OFF         ;
-                      00484     
-009A   2???           00485     call        DELAY_500ms         ; Keep a delay
+0091   1405           00465     bsf         PORTA, 0            ; Open COIN_GATE
+0092   2???           00466     call        MOTOR_PLUS90_ON     ;
+0093   1005           00467     bcf         PORTA, 0            ;
+0094   2???           00468     call        MOTOR_PLUS90_OFF    ;
+                      00469     
+0095   2???           00470     call        DELAY_500ms         ; Keep a delay
+                      00471     
+0096   1405           00472     bsf         PORTA, 0            ; Close COIN_GATE
+0097   2???           00473     call        MOTOR_0_ON          ;
+0098   1005           00474     bcf         PORTA, 0            ;
+0099   2???           00475     call        MOTOR_0_OFF         ;
+                      00476     
+009A   2???           00477     call        DELAY_500ms         ; Keep a delay
+                      00478     
+009B                  00479 UPDATE_DISPLAY:
+                      00480     ; Update the total amount register (running sum)
+009B   0818           00481     movf        CoinType, W         ; Update value count
+009C   0797           00482     addwf       TotalAmount, f      ; 
+                      00483     
+009D   2???           00484     call        BIN_TO_BCD          ; Convert the 8-bit binary number to BCD
+                      00485                                     ; (without altering the actual sum)
                       00486     
-009B                  00487 UPDATE_DISPLAY:
-                      00488     ; Update the total amount register (running sum)
-009B   0818           00489     movf        CoinType, W         ; Update value count
-009C   0797           00490     addwf       TotalAmount, f      ; 
-                      00491     
-009D   2???           00492     call        BIN_TO_BCD          ; Convert the 8-bit binary number to BCD
-                      00493                                     ; (without altering the actual sum)
-                      00494     
-009E   0819           00495     movf        BCDAmount, W        ;
-009F   009A           00496     movwf       DisplayReg          ;
-00A0   2???           00497     call        DISPLAY_BITS        ;
-00A1   2???           00498     call        DELAY_500ms         ;
-                      00499 
-                      00500 ;-------------------------------------------------------------------------------
-                      00501 
-                      00502 ;-------------------------------------------------------------------------------
-                      00503 ; TURN_AND_TILT: Turns and tilts the platform based on the type of coin and
-                      00504 ;                returns back to END_MAIN.
-                      00505 
-00A2                  00506 TURN_AND_TILT:
-00A2   0818           00507     movf        CoinType, W         ; Take the identified coin type to W
-00A3   3C01           00508     sublw       d'1'                ; Check if coin type is d'1'
-00A4   1903           00509     btfsc       STATUS, Z           ;
-00A5   2???           00510     goto        TURN_PLUS90         ; If yes, turn TURN motor to +90 degrees
-                      00511 
-00A6   0818           00512     movf        CoinType, W         ; Take the identified coin type to W
-00A7   3C05           00513     sublw       d'5'                ; Check if coin type is d'5'
-00A8   1903           00514     btfsc       STATUS, Z           ;
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 11
+009E   0819           00487     movf        BCDAmount, W        ; Send the BCDAmount to the display
+009F   009A           00488     movwf       DisplayReg          ; register.
+00A0   2???           00489     call        DISPLAY_BITS        ;
+00A1   2???           00490     call        DELAY_500ms         ; Keep a delay
+                      00491 
+                      00492 ;-------------------------------------------------------------------------------
+                      00493 
+                      00494 ;-------------------------------------------------------------------------------
+                      00495 ; TURN_AND_TILT: Turns and tilts the platform based on the type of coin and
+                      00496 ;                returns back to END_MAIN.
+                      00497 
+00A2                  00498 TURN_AND_TILT:
+00A2   0818           00499     movf        CoinType, W         ; Take the identified coin type to W
+00A3   3C01           00500     sublw       d'1'                ; Check if coin type is d'1'
+00A4   1903           00501     btfsc       STATUS, Z           ;
+00A5   2???           00502     goto        TURN_PLUS90         ; If yes, turn TURN motor to +90 degrees
+                      00503 
+00A6   0818           00504     movf        CoinType, W         ; Take the identified coin type to W
+00A7   3C05           00505     sublw       d'5'                ; Check if coin type is d'5'
+00A8   1903           00506     btfsc       STATUS, Z           ;
+00A9   2???           00507     goto        TURN_PLUS90         ; If yes, turn TURN motor to +90 degrees
+                      00508 
+00AA                  00509 TILT:
+00AA   0818           00510     movf        CoinType, W         ; Take the identified coin type to W
+00AB   3C01           00511     sublw       d'1'                ; Check if coin type is d'1'
+00AC   1903           00512     btfsc       STATUS, Z           ; 
+00AD   2???           00513     goto        TILT_PLUS30         ; If yes, turn TILT motor to +30 degrees
+                      00514 
+00AE   0818           00515     movf        CoinType, W         ; Take the identified coin type to W
+00AF   3C0A           00516     sublw       d'10'               ; Check if coin type is d'10'
+00B0   1903           00517     btfsc       STATUS, Z           ; 
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 11
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-00A9   2???           00515     goto        TURN_PLUS90         ; If yes, turn TURN motor to +90 degrees
-                      00516 
-00AA                  00517 TILT:
-00AA   0818           00518     movf        CoinType, W         ; Take the identified coin type to W
-00AB   3C01           00519     sublw       d'1'                ; Check if coin type is d'1'
-00AC   1903           00520     btfsc       STATUS, Z           ; 
-00AD   2???           00521     goto        TILT_PLUS30         ; If yes, turn TILT motor to +30 degrees
-                      00522 
-00AE   0818           00523     movf        CoinType, W         ; Take the identified coin type to W
-00AF   3C0A           00524     sublw       d'10'               ; Check if coin type is d'10'
-00B0   1903           00525     btfsc       STATUS, Z           ; 
-00B1   2???           00526     goto        TILT_PLUS30         ; If yes, turn TILT motor to +30 degrees
-                      00527 
-00B2   0818           00528     movf        CoinType, W         ; Take the identified coin type to W
-00B3   3C02           00529     sublw       d'2'                ; Check if coin type is d'2'
-00B4   1903           00530     btfsc       STATUS, Z           ; 
-00B5   2???           00531     goto        TILT_MINUS30        ; If yes, turn TILT motor to -30 degrees
-                      00532 
-00B6   0818           00533     movf        CoinType, W         ; Take the identified coin type to W
-00B7   3C05           00534     sublw       d'5'                ; Check if coin type is d'5'
-00B8   1903           00535     btfsc       STATUS, Z           ; 
-00B9   2???           00536     goto        TILT_MINUS30        ; If yes, turn TILT motor to -30 degrees
+00B1   2???           00518     goto        TILT_PLUS30         ; If yes, turn TILT motor to +30 degrees
+                      00519 
+00B2   0818           00520     movf        CoinType, W         ; Take the identified coin type to W
+00B3   3C02           00521     sublw       d'2'                ; Check if coin type is d'2'
+00B4   1903           00522     btfsc       STATUS, Z           ; 
+00B5   2???           00523     goto        TILT_MINUS30        ; If yes, turn TILT motor to -30 degrees
+                      00524 
+00B6   0818           00525     movf        CoinType, W         ; Take the identified coin type to W
+00B7   3C05           00526     sublw       d'5'                ; Check if coin type is d'5'
+00B8   1903           00527     btfsc       STATUS, Z           ; 
+00B9   2???           00528     goto        TILT_MINUS30        ; If yes, turn TILT motor to -30 degrees
+                      00529 
+00BA                  00530 TURN_PLUS90:
+00BA   1485           00531     bsf         PORTA, 1            ; Turn TURN motor to +90 degrees
+00BB   2???           00532     call        MOTOR_PLUS90_ON     ;
+00BC   1085           00533     bcf         PORTA, 1            ;
+00BD   2???           00534     call        MOTOR_PLUS90_OFF    ;
+                      00535 
+00BE   2???           00536     call        DELAY_500ms         ; Keep a delay
                       00537 
-00BA                  00538 TURN_PLUS90:
-00BA   1485           00539     bsf         PORTA, 1            ; Turn TURN motor to +90 degrees
-00BB   2???           00540     call        MOTOR_PLUS90_ON     ;
-00BC   1085           00541     bcf         PORTA, 1            ;
-00BD   2???           00542     call        MOTOR_PLUS90_OFF    ;
-                      00543 
-00BE   2???           00544     call        DELAY_500ms         ; Keep a delay
-                      00545 
-00BF   2???           00546     goto        TILT
-                      00547 
-00C0                  00548 TILT_PLUS30:
-00C0   1505           00549     bsf         PORTA, 2            ; Turn TURN motor to +30 degrees
-00C1   2???           00550     call        MOTOR_PLUS30_ON     ;
-00C2   1105           00551     bcf         PORTA, 2            ;
-00C3   2???           00552     call        MOTOR_PLUS30_OFF    ;
-                      00553         
-00C4   2???           00554     call        DELAY_500ms         ; Keep a delay
+00BF   2???           00538     goto        TILT
+                      00539 
+00C0                  00540 TILT_PLUS30:
+00C0   1505           00541     bsf         PORTA, 2            ; Turn TURN motor to +30 degrees
+00C1   2???           00542     call        MOTOR_PLUS30_ON     ;
+00C2   1105           00543     bcf         PORTA, 2            ;
+00C3   2???           00544     call        MOTOR_PLUS30_OFF    ;
+                      00545         
+00C4   2???           00546     call        DELAY_500ms         ; Keep a delay
+                      00547         
+00C5   2???           00548     goto        END_MAIN            ;
+                      00549 
+00C6                  00550 TILT_MINUS30:
+00C6   1505           00551     bsf         PORTA, 2            ; Turn TURN motor to -30 degrees
+00C7   2???           00552     call        MOTOR_MINUS30_ON    ;
+00C8   1105           00553     bcf         PORTA, 2            ;
+00C9   2???           00554     call        MOTOR_MINUS30_OFF   ;
                       00555         
-00C5   2???           00556     goto        END_MAIN            ;
-                      00557 
-00C6                  00558 TILT_MINUS30:
-00C6   1505           00559     bsf         PORTA, 2            ; Turn TURN motor to -30 degrees
-00C7   2???           00560     call        MOTOR_MINUS30_ON    ;
-00C8   1105           00561     bcf         PORTA, 2            ;
-00C9   2???           00562     call        MOTOR_MINUS30_OFF   ;
-                      00563         
-00CA   2???           00564     call        DELAY_500ms         ; Keep a delay
-                      00565         
-00CB   2???           00566     goto        END_MAIN            ;
-                      00567 ;-------------------------------------------------------------------------------
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 12
+00CA   2???           00556     call        DELAY_500ms         ; Keep a delay
+                      00557         
+00CB   2???           00558     goto        END_MAIN            ;
+                      00559 ;-------------------------------------------------------------------------------
+                      00560 
+                      00561 ;-------------------------------------------------------------------------------
+                      00562 ; Subroutines for motor PWM delays
+                      00563 
+00CC                  00564 MOTOR_PLUS90_ON:
+00CC   3094           00565     movlw       d'148'              ; set layer 1 delay counter
+00CD   008C           00566     movwf       VarX                ; 
+00CE   3003           00567     movlw       d'3'                ; set layer 2 delay counter
+00CF   008D           00568     movwf       VarY                ; 
+00D0   3001           00569     movlw       d'1'                ; set layer 3 delay counter
+00D1   008E           00570     movwf       VarZ                ; 
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 12
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00568 
-                      00569 ;-------------------------------------------------------------------------------
-                      00570 ; Subroutines for motor PWM delays
-                      00571 
-00CC                  00572 MOTOR_PLUS90_ON:
-00CC   3094           00573     movlw       d'148'              ; set layer 1 delay counter
-00CD   008C           00574     movwf       VarX                ; 
-00CE   3003           00575     movlw       d'3'                ; set layer 2 delay counter
-00CF   008D           00576     movwf       VarY                ; 
-00D0   3001           00577     movlw       d'1'                ; set layer 3 delay counter
-00D1   008E           00578     movwf       VarZ                ; 
-00D2   2???           00579     call        DELAY               ; keep the set-up delay
-                      00580         
-00D3   0008           00581     return
-                      00582         
-00D4                  00583 MOTOR_PLUS90_OFF:
-00D4   3001           00584     movlw       d'1'                ; set layer 1 delay counter
-00D5   008C           00585     movwf       VarX                ; 
-00D6   3001           00586     movlw       d'1'                ; set layer 2 delay counter
-00D7   008D           00587     movwf       VarY                ; 
-00D8   3003           00588     movlw       d'3'                ; set layer 3 delay counter
-00D9   008E           00589     movwf       VarZ                ; 
-00DA   2???           00590     call        DELAY               ; keep the set-up delay
-                      00591         
-00DB   0008           00592     return
-                      00593 
-00DC                  00594 MOTOR_0_ON:
-00DC   30ED           00595     movlw       d'237'              ; set layer 1 delay counter
-00DD   008C           00596     movwf       VarX                ; 
-00DE   3002           00597     movlw       d'2'                ; set layer 2 delay counter
-00DF   008D           00598     movwf       VarY                ; 
-00E0   3001           00599     movlw       d'1'                ; set layer 3 delay counter
-00E1   008E           00600     movwf       VarZ                ; 
-00E2   2???           00601     call        DELAY               ; keep the set-up delay
-                      00602         
-00E3   0008           00603     return
-                      00604         
-00E4                  00605 MOTOR_0_OFF:
-00E4   30A0           00606     movlw       d'160'              ; set layer 1 delay counter
-00E5   008C           00607     movwf       VarX                ; 
-00E6   3001           00608     movlw       d'1'                ; set layer 2 delay counter
-00E7   008D           00609     movwf       VarY                ; 
-00E8   3001           00610     movlw       d'1'                ; set layer 3 delay counter
-00E9   008E           00611     movwf       VarZ                ; 
-00EA   2???           00612     call        DELAY               ; keep the set-up delay
-                      00613         
-00EB   0008           00614     return
-                      00615         
-00EC                  00616 MOTOR_MINUS30_ON:
-00EC   30B5           00617     movlw       d'181'              ; set layer 1 delay counter
-00ED   008C           00618     movwf       VarX                ; 
-00EE   3002           00619     movlw       d'2'                ; set layer 2 delay counter
-00EF   008D           00620     movwf       VarY                ; 
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 13
+00D2   2???           00571     call        DELAY               ; keep the set-up delay
+                      00572         
+00D3   0008           00573     return
+                      00574         
+00D4                  00575 MOTOR_PLUS90_OFF:
+00D4   3001           00576     movlw       d'1'                ; set layer 1 delay counter
+00D5   008C           00577     movwf       VarX                ; 
+00D6   3001           00578     movlw       d'1'                ; set layer 2 delay counter
+00D7   008D           00579     movwf       VarY                ; 
+00D8   3003           00580     movlw       d'3'                ; set layer 3 delay counter
+00D9   008E           00581     movwf       VarZ                ; 
+00DA   2???           00582     call        DELAY               ; keep the set-up delay
+                      00583         
+00DB   0008           00584     return
+                      00585 
+00DC                  00586 MOTOR_0_ON:
+00DC   30ED           00587     movlw       d'237'              ; set layer 1 delay counter
+00DD   008C           00588     movwf       VarX                ; 
+00DE   3002           00589     movlw       d'2'                ; set layer 2 delay counter
+00DF   008D           00590     movwf       VarY                ; 
+00E0   3001           00591     movlw       d'1'                ; set layer 3 delay counter
+00E1   008E           00592     movwf       VarZ                ; 
+00E2   2???           00593     call        DELAY               ; keep the set-up delay
+                      00594         
+00E3   0008           00595     return
+                      00596         
+00E4                  00597 MOTOR_0_OFF:
+00E4   30A0           00598     movlw       d'160'              ; set layer 1 delay counter
+00E5   008C           00599     movwf       VarX                ; 
+00E6   3001           00600     movlw       d'1'                ; set layer 2 delay counter
+00E7   008D           00601     movwf       VarY                ; 
+00E8   3001           00602     movlw       d'1'                ; set layer 3 delay counter
+00E9   008E           00603     movwf       VarZ                ; 
+00EA   2???           00604     call        DELAY               ; keep the set-up delay
+                      00605         
+00EB   0008           00606     return
+                      00607         
+00EC                  00608 MOTOR_MINUS30_ON:
+00EC   30B5           00609     movlw       d'181'              ; set layer 1 delay counter
+00ED   008C           00610     movwf       VarX                ; 
+00EE   3002           00611     movlw       d'2'                ; set layer 2 delay counter
+00EF   008D           00612     movwf       VarY                ; 
+00F0   3001           00613     movlw       d'1'                ; set layer 3 delay counter
+00F1   008E           00614     movwf       VarZ                ; 
+00F2   2???           00615     call        DELAY               ; keep the set-up delay
+                      00616         
+00F3   0008           00617     return
+                      00618         
+00F4                  00619 MOTOR_MINUS30_OFF:
+00F4   30D9           00620     movlw       d'217'              ; set layer 1 delay counter
+00F5   008C           00621     movwf       VarX                ; 
+00F6   3001           00622     movlw       d'1'                ; set layer 2 delay counter
+00F7   008D           00623     movwf       VarY                ; 
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 13
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-00F0   3001           00621     movlw       d'1'                ; set layer 3 delay counter
-00F1   008E           00622     movwf       VarZ                ; 
-00F2   2???           00623     call        DELAY               ; keep the set-up delay
-                      00624         
-00F3   0008           00625     return
-                      00626         
-00F4                  00627 MOTOR_MINUS30_OFF:
-00F4   30D9           00628     movlw       d'217'              ; set layer 1 delay counter
-00F5   008C           00629     movwf       VarX                ; 
-00F6   3001           00630     movlw       d'1'                ; set layer 2 delay counter
-00F7   008D           00631     movwf       VarY                ; 
-00F8   3001           00632     movlw       d'1'                ; set layer 3 delay counter
-00F9   008E           00633     movwf       VarZ                ; 
-00FA   2???           00634     call        DELAY               ; keep the set-up delay
-                      00635         
-00FB   0008           00636     return
-                      00637 
-00FC                  00638 MOTOR_PLUS30_ON:
-00FC   3024           00639     movlw       d'36'               ; set layer 1 delay counter
-00FD   008C           00640     movwf       VarX                ; 
-00FE   3003           00641     movlw       d'3'                ; set layer 2 delay counter
-00FF   008D           00642     movwf       VarY                ; 
-0100   3001           00643     movlw       d'1'                ; set layer 3 delay counter
-0101   008E           00644     movwf       VarZ                ; 
-0102   2???           00645     call        DELAY               ; keep the set-up delay
-                      00646         
-0103   0008           00647     return
-                      00648         
-0104                  00649 MOTOR_PLUS30_OFF:
-0104   3069           00650     movlw       d'105'              ; set layer 1 delay counter
-0105   008C           00651     movwf       VarX                ; 
-0106   3001           00652     movlw       d'1'                ; set layer 2 delay counter
-0107   008D           00653     movwf       VarY                ; 
-0108   3001           00654     movlw       d'1'                ; set layer 3 delay counter
-0109   008E           00655     movwf       VarZ                ; 
-010A   2???           00656     call        DELAY               ; keep the set-up delay
-                      00657         
-010B   0008           00658     return
-                      00659 
-010C                  00660 DELAY_500ms:
-010C   3048           00661     movlw       d'72'               ; set layer 1 delay counter
-010D   008C           00662     movwf       VarX                ; 
-010E   308A           00663     movlw       d'138'              ; set layer 2 delay counter
-010F   008D           00664     movwf       VarY                ; 
-0110   3003           00665     movlw       d'3'                ; set layer 3 delay counter
-0111   008E           00666     movwf       VarZ                ; 
-0112   2???           00667     call        DELAY               ; keep the set-up delay
-                      00668         
-0113   0008           00669     return
-                      00670         
-0114                  00671 DELAY_100us: ; For ADC power off
-0114   301C           00672     movlw       d'28'               ; set layer 1 delay counter
-0115   008C           00673     movwf       VarX                ; 
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 14
+00F8   3001           00624     movlw       d'1'                ; set layer 3 delay counter
+00F9   008E           00625     movwf       VarZ                ; 
+00FA   2???           00626     call        DELAY               ; keep the set-up delay
+                      00627         
+00FB   0008           00628     return
+                      00629 
+00FC                  00630 MOTOR_PLUS30_ON:
+00FC   3024           00631     movlw       d'36'               ; set layer 1 delay counter
+00FD   008C           00632     movwf       VarX                ; 
+00FE   3003           00633     movlw       d'3'                ; set layer 2 delay counter
+00FF   008D           00634     movwf       VarY                ; 
+0100   3001           00635     movlw       d'1'                ; set layer 3 delay counter
+0101   008E           00636     movwf       VarZ                ; 
+0102   2???           00637     call        DELAY               ; keep the set-up delay
+                      00638         
+0103   0008           00639     return
+                      00640         
+0104                  00641 MOTOR_PLUS30_OFF:
+0104   3069           00642     movlw       d'105'              ; set layer 1 delay counter
+0105   008C           00643     movwf       VarX                ; 
+0106   3001           00644     movlw       d'1'                ; set layer 2 delay counter
+0107   008D           00645     movwf       VarY                ; 
+0108   3001           00646     movlw       d'1'                ; set layer 3 delay counter
+0109   008E           00647     movwf       VarZ                ; 
+010A   2???           00648     call        DELAY               ; keep the set-up delay
+                      00649         
+010B   0008           00650     return
+                      00651 
+010C                  00652 DELAY_500ms:
+010C   3048           00653     movlw       d'72'               ; set layer 1 delay counter
+010D   008C           00654     movwf       VarX                ; 
+010E   308A           00655     movlw       d'138'              ; set layer 2 delay counter
+010F   008D           00656     movwf       VarY                ; 
+0110   3003           00657     movlw       d'3'                ; set layer 3 delay counter
+0111   008E           00658     movwf       VarZ                ; 
+0112   2???           00659     call        DELAY               ; keep the set-up delay
+                      00660         
+0113   0008           00661     return
+                      00662         
+0114                  00663 DELAY_100us: ; For ADC power off
+0114   301C           00664     movlw       d'28'               ; set layer 1 delay counter
+0115   008C           00665     movwf       VarX                ; 
+0116   3001           00666     movlw       d'1'                ; set layer 2 delay counter
+0117   008D           00667     movwf       VarY                ; 
+0118   3001           00668     movlw       d'1'                ; set layer 3 delay counter
+0119   008E           00669     movwf       VarZ                ; 
+011A   2???           00670     call        DELAY               ; keep the set-up delay
+                      00671         
+011B   0008           00672     return
+                      00673 
+                      00674 ;-------------------------------------------------------------------------------
+                      00675 
+                      00676 ;</editor-fold>
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 14
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0116   3001           00674     movlw       d'1'                ; set layer 2 delay counter
-0117   008D           00675     movwf       VarY                ; 
-0118   3001           00676     movlw       d'1'                ; set layer 3 delay counter
-0119   008E           00677     movwf       VarZ                ; 
-011A   2???           00678     call        DELAY               ; keep the set-up delay
-                      00679         
-011B   0008           00680     return
-                      00681 
-                      00682 ;-------------------------------------------------------------------------------
-                      00683 
-                      00684 ;</editor-fold>
-                      00685 
-                      00686 ;-------------------------------------------------------------------------------
-                      00687 
-                      00688 ;-------------------------------------------------------------------------------
-                      00689 ; DISPLAY: Functions related to display
-                      00690 
-                      00691 ;<editor-fold defaultstate="collapsed" desc="DISPLAY">
-                      00692 
-                      00693 ;-------------------------------------------------------------------------------
-                      00694 ; DISPLAY_BITS: Sends the contents in the register DisplayReg to the display
-                      00695 ;               unit.
-                      00696 
-011C                  00697 DISPLAY_BITS:                                                                       ; temporary function
-                             to display a register
-011C   1205           00698     bcf         PORTA, RA4                                                          ; DELETE LATER
-011D   181A           00699     btfsc       DisplayReg, 0
-011E   1605           00700     bsf         PORTA, RA4
+                      00677 
+                      00678 ;-------------------------------------------------------------------------------
+                      00679 
+                      00680 ;-------------------------------------------------------------------------------
+                      00681 ; DISPLAY: Functions related to display
+                      00682 
+                      00683 ;<editor-fold defaultstate="collapsed" desc="DISPLAY">
+                      00684 
+                      00685 ;-------------------------------------------------------------------------------
+                      00686 ; DISPLAY_BITS: Sends the contents in the register DisplayReg to the display
+                      00687 ;               unit.
+                      00688 
+011C                  00689 DISPLAY_BITS:
+011C   1205           00690     bcf         PORTA, RA4
+011D   181A           00691     btfsc       DisplayReg, 0
+011E   1605           00692     bsf         PORTA, RA4
+                      00693         
+011F   1086           00694     bcf         PORTB, RB1
+0120   189A           00695     btfsc       DisplayReg, 1
+0121   1486           00696     bsf         PORTB, RB1
+                      00697         
+0122   1106           00698     bcf         PORTB, RB2
+0123   191A           00699     btfsc       DisplayReg, 2
+0124   1506           00700     bsf         PORTB, RB2
                       00701         
-011F   1086           00702     bcf         PORTB, RB1
-0120   189A           00703     btfsc       DisplayReg, 1
-0121   1486           00704     bsf         PORTB, RB1
+0125   1186           00702     bcf         PORTB, RB3
+0126   199A           00703     btfsc       DisplayReg, 3
+0127   1586           00704     bsf         PORTB, RB3
                       00705         
-0122   1106           00706     bcf         PORTB, RB2
-0123   191A           00707     btfsc       DisplayReg, 2
-0124   1506           00708     bsf         PORTB, RB2
+0128   1206           00706     bcf         PORTB, RB4
+0129   1A1A           00707     btfsc       DisplayReg, 4
+012A   1606           00708     bsf         PORTB, RB4
                       00709         
-0125   1186           00710     bcf         PORTB, RB3
-0126   199A           00711     btfsc       DisplayReg, 3
-0127   1586           00712     bsf         PORTB, RB3
+012B   1286           00710     bcf         PORTB, RB5
+012C   1A9A           00711     btfsc       DisplayReg, 5
+012D   1686           00712     bsf         PORTB, RB5
                       00713         
-0128   1206           00714     bcf         PORTB, RB4
-0129   1A1A           00715     btfsc       DisplayReg, 4
-012A   1606           00716     bsf         PORTB, RB4
+012E   1306           00714     bcf         PORTB, RB6
+012F   1B1A           00715     btfsc       DisplayReg, 6
+0130   1706           00716     bsf         PORTB, RB6
                       00717         
-012B   1286           00718     bcf         PORTB, RB5
-012C   1A9A           00719     btfsc       DisplayReg, 5
-012D   1686           00720     bsf         PORTB, RB5
+0131   1386           00718     bcf         PORTB, RB7
+0132   1B9A           00719     btfsc       DisplayReg, 7
+0133   1786           00720     bsf         PORTB, RB7
                       00721         
-012E   1306           00722     bcf         PORTB, RB6
-012F   1B1A           00723     btfsc       DisplayReg, 6
-0130   1706           00724     bsf         PORTB, RB6
-                      00725         
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 15
+0134   0008           00722     return
+                      00723 
+                      00724 ;-------------------------------------------------------------------------------
+                      00725 
+                      00726 ;</editor-fold>
+                      00727 
+                      00728 ;-------------------------------------------------------------------------------
+                      00729 
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 15
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0131   1386           00726     bcf         PORTB, RB7
-0132   1B9A           00727     btfsc       DisplayReg, 7
-0133   1786           00728     bsf         PORTB, RB7
-                      00729         
-0134   0008           00730     return
-                      00731 
-                      00732 ;-------------------------------------------------------------------------------
-                      00733 
-                      00734 ;</editor-fold>
-                      00735 
-                      00736 ;-------------------------------------------------------------------------------
-                      00737 
-                      00738 ;-------------------------------------------------------------------------------
-                      00739 ; GENERAL SUBROUTINES: Helper functions
-                      00740 
-                      00741 ;<editor-fold defaultstate="collapsed" desc="GENERAL SUBROUTINES">
-                      00742 
-                      00743 ;-------------------------------------------------------------------------------
-                      00744 ; DELAY: Generic delay subroutine
-                      00745 ; T = 18 + (VarX-1)*3 + (VarY-1)*770 + (VarZ-1)*197140 ns                           ; UPDATE
-0135                  00746 DELAY:
-0135   0B8C           00747     decfsz      VarX, f
-0136   2???           00748     goto        DELAY
-                      00749     
-0137   0B8D           00750     decfsz      VarY, f
-0138   2???           00751     goto        DELAY
-                      00752     
-0139   0B8E           00753     decfsz      VarZ, f
-013A   2???           00754     goto        DELAY
-                      00755     
-013B   0008           00756     return
-                      00757 ;-------------------------------------------------------------------------------
-                      00758 
-                      00759 ;-------------------------------------------------------------------------------
-                      00760 ; BIN_TO_BCD: 8-bit binary to BCD conversion. Used for the display.
-                      00761 ;             For an 8-bit number <= 99.
-                      00762 
-013C                  00763 BIN_TO_BCD:
-013C   3008           00764     movlw       d'8'                ; Initialize a counter variable at 8
-013D   008C           00765     movwf       VarX                ;
-                      00766     
-013E   0817           00767     movf        TotalAmount, W
-013F   008D           00768     movwf       VarY
-                      00769     
-0140   0199           00770     clrf        BCDAmount
-                      00771     
-0141                  00772 BB_LOOP_CHECK:
-                      00773 ; Shift left
-0141   0D8D           00774     rlf         VarY, f
-0142   0D99           00775     rlf         BCDAmount, f
+                      00730 ;-------------------------------------------------------------------------------
+                      00731 ; GENERAL SUBROUTINES: Helper functions
+                      00732 
+                      00733 ;<editor-fold defaultstate="collapsed" desc="GENERAL SUBROUTINES">
+                      00734 
+                      00735 ;-------------------------------------------------------------------------------
+                      00736 ; DELAY: Generic delay subroutine
+                      00737 ; T = 18 + (VarX-1)*3 + (VarY-1)*770 + (VarZ-1)*197140 ns
+0135                  00738 DELAY:
+0135   0B8C           00739     decfsz      VarX, f
+0136   2???           00740     goto        DELAY
+                      00741     
+0137   0B8D           00742     decfsz      VarY, f
+0138   2???           00743     goto        DELAY
+                      00744     
+0139   0B8E           00745     decfsz      VarZ, f
+013A   2???           00746     goto        DELAY
+                      00747     
+013B   0008           00748     return
+                      00749 ;-------------------------------------------------------------------------------
+                      00750 
+                      00751 ;-------------------------------------------------------------------------------
+                      00752 ; BIN_TO_BCD: 8-bit binary to BCD conversion. Used for the display.
+                      00753 ;             Uses Double-Dabble algorithm (for an 8-bit number <= 99).
+                      00754 
+013C                  00755 BIN_TO_BCD:
+013C   3008           00756     movlw       d'8'                ; Initialize counter variable VarX at 8
+013D   008C           00757     movwf       VarX                ; 
+                      00758     
+013E   0817           00759     movf        TotalAmount, W      ; Copy TotalAmount to VarY
+013F   008D           00760     movwf       VarY                ;
+                      00761     
+0140   0199           00762     clrf        BCDAmount           ; Clear the BCDAmount register
+                      00763     
+0141                  00764 BB_LOOP_CHECK:
+0141   0D8D           00765     rlf         VarY, f             ; Left-shift VarY
+0142   0D99           00766     rlf         BCDAmount, f        ; Left-shift BCDAmount
+                      00767     
+0143   0B8C           00768     decfsz      VarX, f             ; Decrement the loop index counter
+0144   2???           00769     goto        BB_LOOP_START       ; If VarX > 0, step into loop
+0145   2???           00770     goto        BB_LOOP_END         ; If VarX = 0, step out of loop
+                      00771 
+0146                  00772 BB_LOOP_START:
+                      00773 ; Check the four LSBs
+0146   300F           00774     movlw       b'00001111'         ; Filter our the 4 LSBs of BCDAmount
+0147   0519           00775     andwf       BCDAmount, W        ; and place it in W
                       00776     
-0143   0B8C           00777     decfsz      VarX, f             ; Decrement the loop index counter
-0144   2???           00778     goto        BB_LOOP_START
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 16
+0148   3C04           00777     sublw       d'4'                ; Check if the last 4 bits of current
+                      00778                                     ; BCDAmount is >= 5.
+0149   0819           00779     movf        BCDAmount, W        ; Restore the original value of BCDAmount
+                      00780                                     ; to W
+014A   1C03           00781     btfss       STATUS, C           ; If yes, add 3 to BCDAmount (in W)
+014B   3E03           00782     addlw       d'3'                ;
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 16
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0145   2???           00779     goto        BB_LOOP_END
-                      00780 
-0146                  00781 BB_LOOP_START:
-                      00782 ; Check the four LSBs
-0146   300F           00783     movlw       b'00001111'
-0147   0519           00784     andwf       BCDAmount, W
+                      00783     
+014C   0099           00784     movwf       BCDAmount           ; Move BCDAmount in W to BCDAmount
                       00785     
-0148   3C04           00786     sublw       d'4'                ; Check if the last 4 bits of current
-                      00787                                     ; BCDAmount is >= 5.
-0149   0819           00788     movf        BCDAmount, W
-014A   1C03           00789     btfss       STATUS, C           ; If yes, add 3 to BCDAmount
-014B   3E03           00790     addlw       d'3'                ;
+014D   2???           00786     goto        BB_LOOP_CHECK       ; Go to the beginning of the loop
+                      00787                                     ; and check if further iterations are
+                      00788                                     ; necessary.
+                      00789     
+014E                  00790 BB_LOOP_END:
                       00791     
-014C   0099           00792     movwf       BCDAmount
-                      00793     
-014D   2???           00794     goto        BB_LOOP_CHECK
-                      00795     
-014E                  00796 BB_LOOP_END:
-                      00797     
-014E   0008           00798     return
-                      00799 ;-------------------------------------------------------------------------------
+014E   0008           00792     return                          ; Return back to the caller function
+                      00793 ;-------------------------------------------------------------------------------
+                      00794 
+                      00795 ;</editor-fold>
+                      00796 
+                      00797 ;-------------------------------------------------------------------------------
+                      00798 
+                      00799 ;</editor-fold>
                       00800 
-                      00801 ;</editor-fold>
-                      00802 
-                      00803 ;-------------------------------------------------------------------------------
-                      00804 
-                      00805 ;</editor-fold>
-                      00806 
-                      00807 ;-------------------------------------------------------------------------------
-                      00808 ; Assembler directive: end
-                      00809         end
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 17
+                      00801 ;-------------------------------------------------------------------------------
+                      00802 ; Assembler directive: end
+                      00803         end
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 17
 
 
 SYMBOL TABLE
@@ -958,9 +948,6 @@ CType3Byte2                       0000007B
 CType4Byte0                       00000000
 CType4Byte1                       000000A0
 CType4Byte2                       0000007A
-CTypeMaskB0                       00000000
-CTypeMaskB1                       000000E0
-CTypeMaskB2                       000000FF
 CoinType                          00000018
 DC                                00000001
 DELAY                             00000135
@@ -979,15 +966,15 @@ EOC                               0000003A
 F                                 00000001
 FSR                               00000004
 Flags                             00000016
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 18
+GIE                               00000007
+IDLE_STATE                        00000038
+INDF                              00000000
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 18
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-GIE                               00000007
-IDLE_STATE                        00000038
-INDF                              00000000
 INIT                              00000005
 INTCON                            0000000B
 INTE                              00000004
@@ -1038,15 +1025,15 @@ RP0                               00000005
 RP1                               00000006
 RefByte0                          00000015
 RefByte1                          00000014
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 19
+RefByte2                          00000013
+SOC                               00000030
+STATUS                            00000003
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 19
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-RefByte2                          00000013
-SOC                               00000030
-STATUS                            00000003
 T0CS                              00000005
 T0IE                              00000005
 T0IF                              00000002
@@ -1097,15 +1084,15 @@ _IDLOC0                           00002000
 _IDLOC1                           00002001
 _IDLOC2                           00002002
 _IDLOC3                           00002003
-MPASM 5.77                      MAINCODE.ASM   9-26-2021  23:55:02         PAGE 20
+_LP_OSC                           00003FFC
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 20
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-_LP_OSC                           00003FFC
-_PWRTE_OFF                        00003FFF
-_PWRTE_ON                         00003FF7
 _RC_OSC                           00003FFF
 _WDTE_OFF                         00003FFB
 _WDTE_ON                          00003FFF
