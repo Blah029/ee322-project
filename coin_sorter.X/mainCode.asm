@@ -70,16 +70,16 @@ RefByte0    equ         0x15
 ; of the HX711 module
 BitIdx      equ         0x0f                
       
-; Counter variables for DELAY subroutine
-VarX        equ         0x0c		; Used in decfsz
-VarY        equ         0x0d		; Used in decfsz
-VarZ        equ         0x0e		; Used in decfsz
-    
 ; Flag register: Stores bits corresponding to specific purposes
 ; Bit 0: EOC                            (0: Not EOC, 1: EOC)
 ; Bit 1: Byte1 comparison result        (0: Unequal, 1: Equal)
 ; Bit 2: Byte2 comparison result        (0: Unequal, 1: Equal)
 Flags       equ         0x16
+      
+; Counter variables for DELAY subroutine
+VarX        equ         0x0c		; Used in decfsz
+VarY        equ         0x0d		; Used in decfsz
+VarZ        equ         0x0e		; Used in decfsz
 
 ; Processing
 CoinType    equ         0x18            ; Store the current coin type
@@ -170,7 +170,7 @@ MAIN:
 ; Read a raw value from ADC of HX711 module
     call        READ_FROM_ADC
 
-; Turn off the ADC temporarily
+; Power down the ADC temporarily
     bsf         PORTA, RA3          ; ADC: Power down mode
     call        DELAY_100us         ;
         
@@ -282,7 +282,7 @@ POST_PROC:
     movf        Byte2, W            ;
     xorlw       b'10000000'         ; XOR Byte2 with 0x80 (10000000)
     movwf       Byte2               ; (Inverts the MSB of Byte2)
-        
+    
     bcf         PORTA, RA3          ; Turn off the SCK pin of HX711
     nop                             ;
         
