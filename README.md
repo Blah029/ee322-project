@@ -13,5 +13,5 @@
   - Progress Report 2: 30th July 2021
   - Progress Report 3: 20th Aug 2021
 - Due date
-  - Simulation: *29/09/2021*
+  - Project presentation (simulation): 29th Sep 2021
   - Hardware implementation: TBA
