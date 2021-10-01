@@ -1,4 +1,4 @@
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  1
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -57,7 +57,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
   0000007B            00041 CType2Byte2 equ         b'01111011'
                       00042 
   00000000            00043 CType3Byte0 equ         b'00000000'     ; Rs. 5
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  2
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -116,7 +116,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00094 ;</editor-fold>
                       00095 
                       00096 ;<editor-fold defaultstate="collapsed" desc="INITIALIZATION">
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  3
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -175,7 +175,7 @@ Message[302]: Register in operand not in bank 0.  Ensure that bank bits are corr
                       00144 ; Initialize PORTA and PORTB to zeros
 0011   3000           00145     movlw       b'00000000'         ; All zeros
 0012   0086           00146     movwf       PORTB
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  4
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  4
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -234,7 +234,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0029   2???           00197     call        DELAY_500ms         ; Keep a delay
                       00198     
                       00199 ; Turn on the ADC again for the next cycle
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  5
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  5
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -293,7 +293,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00250                                     ; (loop)
                       00251 
 003A                  00252 EOC: ; End of conversion
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  6
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  6
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -352,7 +352,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 004D   1585           00303     bsf         PORTA, RA3          ; Turn on the SCK pin of HX711
 004E   0000           00304     nop
                       00305         
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  7
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  7
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -411,7 +411,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0062   3080           00356     movlw       CType2Byte1         ;
 0063   0094           00357     movwf       RefByte1            ;
 0064   307B           00358     movlw       CType2Byte2         ;
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  8
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  8
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -470,7 +470,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 0081   300A           00409     movlw       d'10'
 0082   0098           00410     movwf       CoinType
 0083   2???           00411     goto        COIN_GATE_OPEN      ; Accept the coin
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE  9
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE  9
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -529,7 +529,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00462 ; COIN_GATE_OPEN: Takes the coin in if the coin weight matches the reference
                       00463 ;                 values.
 0091                  00464 COIN_GATE_OPEN:
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 10
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 10
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -588,7 +588,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 00AE   0818           00515     movf        CoinType, W         ; Take the identified coin type to W
 00AF   3C0A           00516     sublw       d'10'               ; Check if coin type is d'10'
 00B0   1903           00517     btfsc       STATUS, Z           ; 
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 11
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 11
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -647,7 +647,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 00CF   008D           00568     movwf       VarY                ; 
 00D0   3001           00569     movlw       d'1'                ; set layer 3 delay counter
 00D1   008E           00570     movwf       VarZ                ; 
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 12
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 12
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -706,7 +706,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 00F5   008C           00621     movwf       VarX                ; 
 00F6   3001           00622     movlw       d'1'                ; set layer 2 delay counter
 00F7   008D           00623     movwf       VarY                ; 
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 13
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 13
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -765,7 +765,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00674 ;-------------------------------------------------------------------------------
                       00675 
                       00676 ;</editor-fold>
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 14
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 14
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -824,7 +824,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00727 
                       00728 ;-------------------------------------------------------------------------------
                       00729 
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 15
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 15
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -883,7 +883,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00780                                     ; to W
 014A   1C03           00781     btfss       STATUS, C           ; If yes, add 3 to BCDAmount (in W)
 014B   3E03           00782     addlw       d'3'                ;
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 16
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 16
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -910,7 +910,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00801 ;-------------------------------------------------------------------------------
                       00802 ; Assembler directive: end
                       00803         end
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 17
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 17
 
 
 SYMBOL TABLE
@@ -969,7 +969,7 @@ Flags                             00000016
 GIE                               00000007
 IDLE_STATE                        00000038
 INDF                              00000000
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 18
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 18
 
 
 SYMBOL TABLE
@@ -1028,7 +1028,7 @@ RefByte1                          00000014
 RefByte2                          00000013
 SOC                               00000030
 STATUS                            00000003
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 19
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 19
 
 
 SYMBOL TABLE
@@ -1087,7 +1087,7 @@ _IDLOC3                           00002003
 _LP_OSC                           00003FFC
 _PWRTE_OFF                        00003FFF
 _PWRTE_ON                         00003FF7
-MPASM 5.77                      MAINCODE.ASM   9-27-2021  21:59:09         PAGE 20
+MPASM 5.77                      MAINCODE.ASM   10-1-2021  9:49:08         PAGE 20
 
 
 SYMBOL TABLE
