@@ -1,3 +1,8 @@
+;------------------------------------------------------
+; Transferred to mainCode.asm with some modifications.
+; Code in this file has not been modified.
+;------------------------------------------------------
+
 processor		16F84A					; turn on listing output
 #include		<p16f84a.inc>		    ; include file for register names
 

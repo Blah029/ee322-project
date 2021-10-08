@@ -1,5 +1,6 @@
 // EE322 Project
 // Pseudocode
+// Author: Pandukabhaya V.K.M. E/17/234
 
 // Define Constants: weight thresholds
 - W_1
