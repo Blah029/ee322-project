@@ -1,0 +1,114 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Fri Oct 01 09:49:09 2021
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000002
+                   .cinit    romdata   0x000001    program   0x000004
+                   .org_1       code   0x000004    program   0x000296
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000002      
+                            0x000004    0x00014e      
+            334 out of 1094 program addresses used, program memory utilization is 30%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+             ADC_READ_BIT   0x000049    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            BB_LOOP_CHECK   0x000141    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              BB_LOOP_END   0x00014e    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            BB_LOOP_START   0x000146    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+               BIN_TO_BCD   0x00013c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+        BIT_READ_LOOP_END   0x000040    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+      BIT_READ_LOOP_START   0x00003e    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+          CHECK_TOLERANCE   0x000084    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+           COIN_GATE_OPEN   0x000091    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              COIN_TYPE_1   0x000054    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              COIN_TYPE_2   0x000060    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              COIN_TYPE_3   0x00006c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              COIN_TYPE_4   0x000078    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+           COMPARE_WEIGHT   0x000054    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                    DELAY   0x000135    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              DELAY_100us   0x000114    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              DELAY_500ms   0x00010c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+             DISPLAY_BITS   0x00011c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                 END_MAIN   0x000020    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                      EOC   0x00003a    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+               IDLE_STATE   0x000038    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                     INIT   0x000005    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            ISR_ADC_READY   0x00003b    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                     MAIN   0x00001c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              MOTOR_0_OFF   0x0000e4    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+               MOTOR_0_ON   0x0000dc    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+        MOTOR_MINUS30_OFF   0x0000f4    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+         MOTOR_MINUS30_ON   0x0000ec    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+         MOTOR_PLUS30_OFF   0x000104    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+          MOTOR_PLUS30_ON   0x0000fc    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+         MOTOR_PLUS90_OFF   0x0000d4    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+          MOTOR_PLUS90_ON   0x0000cc    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                POST_PROC   0x000043    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            READ_FROM_ADC   0x00002c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                      SOC   0x000030    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                     TILT   0x0000aa    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+             TILT_MINUS30   0x0000c6    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              TILT_PLUS30   0x0000c0    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            TURN_AND_TILT   0x0000a2    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              TURN_PLUS90   0x0000ba    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+           UPDATE_DISPLAY   0x00009b    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                     INIT   0x000005    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                     MAIN   0x00001c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                 END_MAIN   0x000020    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            READ_FROM_ADC   0x00002c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                      SOC   0x000030    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+               IDLE_STATE   0x000038    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                      EOC   0x00003a    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            ISR_ADC_READY   0x00003b    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+      BIT_READ_LOOP_START   0x00003e    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+        BIT_READ_LOOP_END   0x000040    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                POST_PROC   0x000043    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+             ADC_READ_BIT   0x000049    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+           COMPARE_WEIGHT   0x000054    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              COIN_TYPE_1   0x000054    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              COIN_TYPE_2   0x000060    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              COIN_TYPE_3   0x00006c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              COIN_TYPE_4   0x000078    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+          CHECK_TOLERANCE   0x000084    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+           COIN_GATE_OPEN   0x000091    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+           UPDATE_DISPLAY   0x00009b    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            TURN_AND_TILT   0x0000a2    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                     TILT   0x0000aa    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              TURN_PLUS90   0x0000ba    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              TILT_PLUS30   0x0000c0    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+             TILT_MINUS30   0x0000c6    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+          MOTOR_PLUS90_ON   0x0000cc    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+         MOTOR_PLUS90_OFF   0x0000d4    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+               MOTOR_0_ON   0x0000dc    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              MOTOR_0_OFF   0x0000e4    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+         MOTOR_MINUS30_ON   0x0000ec    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+        MOTOR_MINUS30_OFF   0x0000f4    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+          MOTOR_PLUS30_ON   0x0000fc    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+         MOTOR_PLUS30_OFF   0x000104    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              DELAY_500ms   0x00010c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              DELAY_100us   0x000114    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+             DISPLAY_BITS   0x00011c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+                    DELAY   0x000135    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+               BIN_TO_BCD   0x00013c    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            BB_LOOP_CHECK   0x000141    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+            BB_LOOP_START   0x000146    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+              BB_LOOP_END   0x00014e    program     static D:\continuum\eng\elec\y3s1\ee322\projects\mini_project\coin_sorter.X\mainCode.asm
+
+
