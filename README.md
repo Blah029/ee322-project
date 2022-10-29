@@ -1,6 +1,6 @@
 # EE322 Project
 
-3rd year EE322 project
+3rd year EE322: Embedded Systems project
 
 - Group G1
   - E/17/146: Jayawickrama JPD
