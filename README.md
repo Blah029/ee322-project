@@ -5,7 +5,7 @@
 - Group G1
   - E/17/146: Jayawickrama JPD
   - E/17/234: Pandukabhaya VKM
-  - E/17/371: Warnakulasuriya R
+  - E/17/371
 - Timeline
   - Group formation: 07th June 2021
   - Project title: 16th June 2021
